@@ -22,7 +22,16 @@ The software includes the implementation of several contact recommendation appro
 
 #### Friends of friends algorithms for contact recommendation
 
-Next, we include a table including the different parameter configurations we have selected for the experiments in our paper. We include these configurations in the `conf` folder.
+Next, we include a table including the different parameter configurations we have selected for the experiments in our paper. We include these configurations in the `conf` folder. The notation followed is the same as the one indicated in the previous formulas.
+
+| Algorithm | Parameters |
+| --- | --- |
+| BM25 | b \in {0.1,0.2,...,0.8,0.9,0.999,1.0} <br> k \in {0.001,0.01,0.1,1,10,100,1000} |
+| ExtremeBM25 | b \in {0.1,0.2,...,0.8,0.9,0.999,1.0} |
+| QLD | \mu \in {0.001,0.01,0.1,1,10,100,1000} |
+| QLJM | \lambda \in {0.1,0.2,...,0.8,0.9,0.999,1.0} |
+| QLL | \gamma \in {0.001,0.01,0.1,1,10,100,1000} |
+| PL2 | c \in {0.001,0.01,0.1,1,10,100,1000} |
 
 ### Metrics
 - nDCG@k
