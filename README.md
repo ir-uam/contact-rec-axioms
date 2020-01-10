@@ -26,12 +26,12 @@ Next, we include a table including the different parameter configurations we hav
 
 | Algorithm | Parameters |
 | --- | --- |
-| BM25 | b \in {0.1,0.2,...,0.8,0.9,0.999,1.0} <br> k \in {0.001,0.01,0.1,1,10,100,1000} |
-| ExtremeBM25 | b \in {0.1,0.2,...,0.8,0.9,0.999,1.0} |
-| QLD | \mu \in {0.001,0.01,0.1,1,10,100,1000} |
-| QLJM | \lambda \in {0.1,0.2,...,0.8,0.9,0.999,1.0} |
-| QLL | \gamma \in {0.001,0.01,0.1,1,10,100,1000} |
-| PL2 | c \in {0.001,0.01,0.1,1,10,100,1000} |
+| BM25 | <img src="https://latex.codecogs.com/gif.latex?b%20\in%20\{%200.1,0.2,0.3,...,0.8,0.9,0.999,1.0%20\}" /> <br> <img src="https://latex.codecogs.com/gif.latex?k%20\in%20\{%200.001,0.01,0.1,1,10,100,1000%20\}" /> |
+| ExtremeBM25 | <img src="https://latex.codecogs.com/gif.latex?b%20\in%20\{%200.1,0.2,0.3,...,0.8,0.9,0.999,1.0%20\}" /> |
+| QLD | <img src="https://latex.codecogs.com/gif.latex?\mu%20\in%20\{%200.001,0.01,0.1,1,10,100,1000%20\}" /> |
+| QLJM | <img src="https://latex.codecogs.com/gif.latex?\lambda%20\in%20\{%200.1,0.2,0.3,...,0.8,0.9,0.999,1.0%20\}" /> |
+| QLL | <img src="https://latex.codecogs.com/gif.latex?\gamma%20\in%20\{%200.001,0.01,0.1,1,10,100,1000%20\}" /> |
+| PL2 | <img src="https://latex.codecogs.com/gif.latex?c%20\in%20\{%200.001,0.01,0.1,1,10,100,1000%20\}" /> |
 
 ### Metrics
 - nDCG@k
