@@ -24,7 +24,7 @@ The software includes the implementation of several contact recommendation appro
 
 Next, we include a table including the different parameter configurations we have selected for the experiments in our paper. We include these configurations in the `conf` folder. The notation followed is the same as the one indicated in the previous formulas.
 
-| Algorithm | Parameters |
+| Algorithm (and variants) | Parameters |
 | --- | --- |
 | BM25 | <img src="https://latex.codecogs.com/gif.latex?b%20\in%20\{%200.1,0.2,0.3,...,0.8,0.9,0.999,1.0%20\}" /> <br> <img src="https://latex.codecogs.com/gif.latex?k%20\in%20\{%200.001,0.01,0.1,1,10,100,1000%20\}" /> |
 | ExtremeBM25 | <img src="https://latex.codecogs.com/gif.latex?b%20\in%20\{%200.1,0.2,0.3,...,0.8,0.9,0.999,1.0%20\}" /> |
