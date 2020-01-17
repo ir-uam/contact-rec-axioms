@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es.
+ *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 package es.uam.eps.ir.contactrecaxioms.main;
 
 import es.uam.eps.ir.contactrecaxioms.graph.Adapters;
@@ -33,11 +41,32 @@ import java.util.stream.Collectors;
 
 import static org.ranksys.formats.parsing.Parsers.lp;
 
+/**
+ * Class for reproducing the experiments for the EWC1 axiom.
+ *
+ * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
+ * @author Pablo Castells (pablo.castells@uam.es)
+ */
 public class EWC1
 {
+    /**
+     * Program that reproduces the experiments for the EWC1 axiom.
+     * Generates a file comparing weigthed and unweighted algorithm variants.
+     * @param args Execution arguments:
+     *        <ol>
+     *          <li><b>Train:</b> Route to the file containing the training graph.</li>
+     *          <li><b>Test:</b> Route to the file containing the test links.</li>
+     *          <li><b>Algorithms:</b> Route to an XML file containing the recommender configurations.</li>
+     *          <li><b>Output directory:</b> Directory in which to store the recommendations and the output file.</li>
+     *          <li><b>Directed:</b> True if the network is directed, false otherwise.</li>
+     *          <li><b>Max. Length:</b> Maximum number of recommendations per user.</li>
+     *        </ol>
+     */
     public static void main(String args[])
     {
-        if(args.length < 11)
+        if(args.length < 6)
         {
             System.err.println("Invalid arguments.");
             System.err.println("Usage:");
@@ -50,47 +79,44 @@ public class EWC1
             return;
         }
 
+        // Read the execution arguments:
         String trainDataPath = args[0];
         String testDataPath = args[1];
         String algorithmsPath = args[2];
         String outputPath = args[3];
         boolean directed = args[4].equalsIgnoreCase("true");
-        int maxLength = Parsers.ip.parse(args[8]);
+        int maxLength = Parsers.ip.parse(args[5]);
 
+        // Initialize the maps to store the accuracy values.
         Map<String, Double> weightedValues = new HashMap<>();
         Map<String, Double> unweightedValues = new HashMap<>();
 
+        // Store the different values of weighted / unweighted
         List<Boolean> weightedVals = new ArrayList<>();
         weightedVals.add(true);
         weightedVals.add(false);
 
         // First, we do create the directories.
-        File weightedDirectory = new File(outputPath + File.pathSeparator + "weighted");
-        weightedDirectory.mkdir();
-        File unweightedDirectory = new File(outputPath + File.pathSeparator + "unweighted");
-        unweightedDirectory.mkdir();
+        File weightedDirectory = new File(outputPath + "weighted" + File.separator);
+        weightedDirectory.mkdirs();
+        File unweightedDirectory = new File(outputPath + "unweighted" + File.separator);
+        unweightedDirectory.mkdirs();
 
         weightedVals.forEach(weighted ->
         {
             long timea = System.currentTimeMillis();
+
             // Read the training graph.
             TextGraphReader<Long> greader = new TextGraphReader<>(directed, weighted, false, "\t", Parsers.lp);
-            Graph<Long> auxgraph = greader.read(trainDataPath, weighted, false);
-            if(auxgraph == null)
+            FastGraph<Long> graph = (FastGraph<Long>) greader.read(trainDataPath, weighted, false);
+            if(graph == null)
             {
                 System.err.println("ERROR: Could not read the training graph");
                 return;
             }
 
-            FastGraph<Long> graph = (FastGraph<Long>) Adapters.removeAutoloops(auxgraph);
-            if(graph == null)
-            {
-                System.err.println("ERROR: Could not remove autoloops from the training graph");
-                return;
-            }
-
             // Read the test graph.
-            auxgraph = greader.read(testDataPath, false, false);
+            Graph<Long> auxgraph = greader.read(testDataPath, false, false);
             FastGraph<Long> testGraph = (FastGraph<Long>) Adapters.onlyTrainUsers(auxgraph, graph);
             if(testGraph == null)
             {
@@ -102,7 +128,7 @@ public class EWC1
             System.out.println("Data read (" +(timeb-timea) + " ms.)");
             timea = System.currentTimeMillis();
 
-            // Read the training and test data
+            // Prepare the training and test data
             FastPreferenceData<Long, Long> trainData;
             trainData = GraphSimpleFastPreferenceData.load(graph);
 
@@ -124,17 +150,14 @@ public class EWC1
 
             timeb = System.currentTimeMillis();
             System.out.println("Algorithms selected (" +(timeb-timea) + " ms.)");
-
             // Select the set of users to be recommended, the format, and the filters to apply to the recommendation
             Set<Long> targetUsers = testData.getUsersWithPreferences().collect(Collectors.toCollection(HashSet::new));
-
             System.out.println("Num. target users: " + targetUsers.size());
+
+            // Prepare the elements for the recommendation:
             RecommendationFormat<Long, Long> format = new TRECRecommendationFormat<>(lp,lp);
-
             Function<Long, IntPredicate> filter = FastFilters.and(FastFilters.notInTrain(trainData), FastFilters.notSelf(index), SocialFastFilters.notReciprocal(graph,index));
-
             RecommenderRunner<Long,Long> runner = new FastFilterRecommenderRunner<>(index, index, targetUsers.stream(), filter, maxLength);
-
             // Execute the recommendations
             recMap.entrySet().parallelStream().forEach(entry ->
             {
@@ -143,7 +166,7 @@ public class EWC1
                 String path = outputPath + File.pathSeparator + (weighted ? "weighted" : "unweighted") + File.pathSeparator + name + ".txt";
                 File f = new File(path);
 
-                // First, obtain the metric.
+                // First, create the nDCG metric (for measuring accuracy)
                 NDCG.NDCGRelevanceModel<Long, Long> ndcgModel = new NDCG.NDCGRelevanceModel<>(false, testData, 0.5);
                 SystemMetric<Long, Long> nDCG = new AverageRecommendationMetric<>(new NDCG<>(maxLength, ndcgModel), true);
 
@@ -190,19 +213,7 @@ public class EWC1
             });
         });
 
-        // Write everything in the file
-        try(BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputPath+"res.txt"))))
-        {
-            bw.write("Algorithm\tWeighted\tUnweighted\n");
-            Set<String> algs = weightedValues.keySet();
-            for(String alg : algs)
-            {
-                bw.write(alg + "\t" + weightedValues.get(alg) + "\t" + unweightedValues.get(alg) + "\n");
-            }
-        }
-        catch(IOException ioe)
-        {
-            System.err.println("Something failed while writing the results file");
-        }
+        // Print the file.
+        AuxiliarMethods.printFile(outputPath+"ewc1.txt", weightedValues, unweightedValues, "BM25", "EBM25", maxLength);
     }
 }

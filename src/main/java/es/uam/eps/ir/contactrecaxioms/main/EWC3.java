@@ -32,9 +32,11 @@ import java.util.stream.Collectors;
 import static es.uam.eps.ir.contactrecaxioms.graph.edges.EdgeOrientation.*;
 
 /**
- * Program for reproducing the experiments conducted for the EWC3 axiom.
+ * Class for reproducing the experiments for the EWC3 axiom.
  *
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
  * @author Pablo Castells (pablo.castells@uam.es)
  */
 public class EWC3
@@ -73,6 +75,7 @@ public class EWC3
         Graph<Long> train = greader.read(trainFile);
         Graph<Long> test = greader.read(testFile);
 
+        // Obtain the possible EdgeOrientation values.
         EdgeOrientation[] eos;
         if(directed)
         {
