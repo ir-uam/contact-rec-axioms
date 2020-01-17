@@ -1,4 +1,4 @@
-# IR Axioms for contact recommendation
+# IR axioms for contact recommendation
 This repository contains the code needed to reproduce the experiments of the paper:
 
 > J. Sanz-Cruzado, C. Macdonald, I. Ounis, P. Castells. Axiomatic Analysis of Contact Recommendation Methods in Social Networks: an IR perspective. 13th ACM Conference on Recommender Systems (ECIR 2020). Lisbon, Portugal, April 2020.
