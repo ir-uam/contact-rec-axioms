@@ -1,7 +1,8 @@
 /*
- *  Copyright (C) 2016 Information Retrieval Group at Universidad Aut�noma
- *  de Madrid, http://ir.ii.uam.es
- * 
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
+ *
  *  This Source Code Form is subject to the terms of the Mozilla Public
  *  License, v. 2.0. If a copy of the MPL was not distributed with this
  *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -17,7 +18,6 @@ import es.uam.eps.ir.contactrecaxioms.recommender.grid.RecommendationAlgorithmFu
 import es.uam.eps.ir.ranksys.fast.preference.FastPreferenceData;
 import es.uam.eps.ir.ranksys.rec.Recommender;
 
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +27,10 @@ import static es.uam.eps.ir.contactrecaxioms.recommender.grid.AlgorithmIdentifie
 
 /**
  * Grid search generator for Adamic Adar algorithm.
- * @author Javier Sanz-Cruzado Puig
+ *
  * @param <U> Type of the users.
+ *
+ * @author Javier Sanz-Cruzado Puig
  */
 public class AdamicAdarGridSearch<U> implements AlgorithmGridSearch<U>
 {
@@ -46,26 +48,18 @@ public class AdamicAdarGridSearch<U> implements AlgorithmGridSearch<U>
     private static final String WSEL = "wSel";
 
     @Override
-    public Map<String, RecommendationAlgorithmFunction<U>> grid(Grid grid) {
+    public Map<String, RecommendationAlgorithmFunction<U>> grid(Grid grid)
+    {
         Map<String, RecommendationAlgorithmFunction<U>> recs = new HashMap<>();
 
         List<EdgeOrientation> uSels = grid.getOrientationValues(USEL);
         List<EdgeOrientation> vSels = grid.getOrientationValues(VSEL);
         List<EdgeOrientation> wSels = grid.getOrientationValues(WSEL);
 
-        uSels.stream().forEach(uSel -> 
-        {
-            vSels.stream().forEach(vSel -> 
-            {
-                wSels.stream().forEach(wSel -> 
-                {
-                    recs.put(ADAMIC + "_" + uSel + "_" + vSel + "_" + wSel, (graph, prefData) -> 
-                    {
-                       return new AdamicAdar<>(graph, uSel, vSel, wSel);
-                    });
-                });
-            });
-        });
+        uSels.forEach(uSel ->
+            vSels.forEach(vSel ->
+                wSels.forEach(wSel ->
+                    recs.put(ADAMIC + "_" + uSel + "_" + vSel + "_" + wSel, (graph, prefData) -> new AdamicAdar<>(graph, uSel, vSel, wSel)))));
 
         return recs;
     }
@@ -73,25 +67,16 @@ public class AdamicAdarGridSearch<U> implements AlgorithmGridSearch<U>
     @Override
     public Map<String, Supplier<Recommender<U, U>>> grid(Grid grid, FastGraph<U> graph, FastPreferenceData<U, U> prefData)
     {
-        Map<String, Supplier<Recommender<U,U>>> recs = new HashMap<>();
+        Map<String, Supplier<Recommender<U, U>>> recs = new HashMap<>();
 
         List<EdgeOrientation> uSels = grid.getOrientationValues(USEL);
         List<EdgeOrientation> vSels = grid.getOrientationValues(VSEL);
         List<EdgeOrientation> wSels = grid.getOrientationValues(WSEL);
 
-        uSels.stream().forEach(uSel -> 
-        {
-            vSels.stream().forEach(vSel -> 
-            {
-                wSels.stream().forEach(wSel -> 
-                {
-                    recs.put(ADAMIC + "_" + uSel + "_" + vSel + "_" + wSel, () -> 
-                    {
-                       return new AdamicAdar<>(graph, uSel, vSel, wSel);
-                    });
-                });
-            });
-        });
+        uSels.forEach(uSel ->
+                vSels.forEach(vSel ->
+                        wSels.forEach(wSel ->
+                                recs.put(ADAMIC + "_" + uSel + "_" + vSel + "_" + wSel, () -> new AdamicAdar<>(graph, uSel, vSel, wSel)))));
 
         return recs;
     }

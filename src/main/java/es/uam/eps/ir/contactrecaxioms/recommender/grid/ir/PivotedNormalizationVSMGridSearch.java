@@ -1,3 +1,12 @@
+/*
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
+ *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 package es.uam.eps.ir.contactrecaxioms.recommender.grid.ir;
 
 import es.uam.eps.ir.contactrecaxioms.graph.edges.EdgeOrientation;
@@ -21,7 +30,7 @@ public class PivotedNormalizationVSMGridSearch<U> implements AlgorithmGridSearch
     /**
      * Identifier for the term that graduates the importance of the document lenght.
      */
-    private static final String S  = "s";
+    private static final String S = "s";
     /**
      * Identifier for the orientation of the target user neighborhood
      */
@@ -32,26 +41,18 @@ public class PivotedNormalizationVSMGridSearch<U> implements AlgorithmGridSearch
     private static final String VSEL = "vSel";
 
     @Override
-    public Map<String, Supplier<Recommender<U, U>>> grid(Grid grid, FastGraph<U> graph, FastPreferenceData<U,U> prefData)
+    public Map<String, Supplier<Recommender<U, U>>> grid(Grid grid, FastGraph<U> graph, FastPreferenceData<U, U> prefData)
     {
-        Map<String, Supplier<Recommender<U,U>>> recs = new HashMap<>();
+        Map<String, Supplier<Recommender<U, U>>> recs = new HashMap<>();
         List<Double> ss = grid.getDoubleValues(S);
         List<EdgeOrientation> uSels = grid.getOrientationValues(USEL);
         List<EdgeOrientation> vSels = grid.getOrientationValues(VSEL);
 
-        ss.stream().forEach(s ->
-        {
-            uSels.stream().forEach(uSel ->
-            {
-                vSels.stream().forEach(vSel ->
-                {
-                    recs.put(PIVOTED + "_" + uSel + "_" + vSel + "_" + s, () ->
-                    {
-                        return new PivotedNormalizationVSM<>(graph, uSel, vSel, s);
-                    });
-                });
-            });
-        });
+        ss.forEach(s ->
+            uSels.forEach(uSel ->
+                vSels.forEach(vSel ->
+                    recs.put(PIVOTED + "_" + uSel + "_" + vSel + "_" + s, () -> new PivotedNormalizationVSM<>(graph, uSel, vSel, s)))));
+
         return recs;
     }
 
@@ -63,19 +64,11 @@ public class PivotedNormalizationVSMGridSearch<U> implements AlgorithmGridSearch
         List<EdgeOrientation> uSels = grid.getOrientationValues(USEL);
         List<EdgeOrientation> vSels = grid.getOrientationValues(VSEL);
 
-        ss.stream().forEach(s ->
-        {
-            uSels.stream().forEach(uSel ->
-            {
-                vSels.stream().forEach(vSel ->
-                {
-                    recs.put(PIVOTED + "_" + uSel + "_" + vSel + "_" + s, (graph, prefData) ->
-                    {
-                        return new PivotedNormalizationVSM<>(graph, uSel, vSel, s);
-                    });
-                });
-            });
-        });
+        ss.forEach(s ->
+            uSels.forEach(uSel ->
+                vSels.forEach(vSel ->
+                    recs.put(PIVOTED + "_" + uSel + "_" + vSel + "_" + s, (graph, prefData) -> new PivotedNormalizationVSM<>(graph, uSel, vSel, s)))));
+
         return recs;
     }
 }

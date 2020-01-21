@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2019 Information Retrieval Group at Universidad Autónoma
- * de Madrid, http://ir.ii.uam.es.
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, you can obtain one at http://mozilla.org/MPL/2.0.
- *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package es.uam.eps.ir.contactrecaxioms.graph;
 
@@ -299,7 +299,7 @@ public interface Graph<V> extends Serializable, ReducedIndex<V>
      * @param node The node
      *
      * @return the number nodes for which both (u to node) and (node to u) exist in
-     *         the graph if node is in the graph, -1 otherwise.
+     * the graph if node is in the graph, -1 otherwise.
      */
     default int getMutualNodesCount(V node)
     {
@@ -409,7 +409,7 @@ public interface Graph<V> extends Serializable, ReducedIndex<V>
      * @param newWeight The new weight.
      *
      * @return true if everything goes OK, false if the edge does not exist
-     *         or something fails.
+     * or something fails.
      */
     boolean updateEdgeWeight(V nodeA, V nodeB, double newWeight);
 
@@ -613,9 +613,9 @@ public interface Graph<V> extends Serializable, ReducedIndex<V>
     /**
      * Obtains the set of nodes with edges in a particular direction.
      *
-     * @param direction
+     * @param direction the particular direction
      *
-     * @return
+     * @return the set of nodes with edges in the given direction.
      */
     Stream<V> getNodesWithEdges(EdgeOrientation direction);
 

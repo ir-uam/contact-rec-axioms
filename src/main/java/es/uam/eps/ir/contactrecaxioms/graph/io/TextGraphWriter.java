@@ -1,15 +1,16 @@
 /*
- * Copyright (C) 2019 Information Retrieval Group at Universidad Autónoma
- * de Madrid, http://ir.ii.uam.es.
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, you can obtain one at http://mozilla.org/MPL/2.0.
- *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package es.uam.eps.ir.contactrecaxioms.graph.io;
 
 import es.uam.eps.ir.contactrecaxioms.graph.Graph;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -115,8 +116,8 @@ public class TextGraphWriter<V> implements GraphWriter<V>
                     List<V> adjacentNodes = graph.getAdjacentNodes(node).collect(Collectors.toCollection(ArrayList::new));
                     for (V v : adjacentNodes)
                     {
-                        Double weight = graph.getEdgeWeight(node, v);
-                        Integer type = graph.getEdgeType(node, v);
+                        double weight = graph.getEdgeWeight(node, v);
+                        int type = graph.getEdgeType(node, v);
 
                         String toWrite = node.toString() + delimiter + v.toString();
 
@@ -143,8 +144,8 @@ public class TextGraphWriter<V> implements GraphWriter<V>
                     List<V> adjacentNodes = graph.getAdjacentNodes(node).filter(v -> !visited.contains(v)).collect(Collectors.toCollection(ArrayList::new));
                     for (V v : adjacentNodes)
                     {
-                        Double weight = graph.getEdgeWeight(node, v);
-                        Integer type = graph.getEdgeType(node, v);
+                        double weight = graph.getEdgeWeight(node, v);
+                        int type = graph.getEdgeType(node, v);
 
                         bw.write(node.toString() + delimiter + v.toString());
                         if (writeWeights)

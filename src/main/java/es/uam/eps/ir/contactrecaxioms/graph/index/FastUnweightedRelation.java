@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2019 Information Retrieval Group at Universidad Autónoma
- * de Madrid, http://ir.ii.uam.es.
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, you can obtain one at http://mozilla.org/MPL/2.0.
- *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package es.uam.eps.ir.contactrecaxioms.graph.index;
 
@@ -184,14 +184,17 @@ public abstract class FastUnweightedRelation<W> implements Relation<W>
         }
         else // the relation has to be created.
         {
-            int idx = Math.abs(value + 1);
-            this.firstIdxList.get(secondIdx).add(idx, firstIdx);
-        }
+            int auxvalue = value;
 
-        value = this.binarySearch(firstIdx, secondIdx, false);
-        int idx = Math.abs(value + 1);
-        this.secondIdxList.get(firstIdx).add(idx, secondIdx);
-        return true;
+            value = this.binarySearch(firstIdx, secondIdx, false);
+            if(value == null || (value >= 0)) return false;
+
+            int idx = Math.abs(auxvalue + 1);
+            this.firstIdxList.get(secondIdx).add(idx, firstIdx);
+            idx = Math.abs(value + 1);
+            this.secondIdxList.get(firstIdx).add(idx, secondIdx);
+            return true;
+        }
     }
 
     @Override
@@ -223,7 +226,7 @@ public abstract class FastUnweightedRelation<W> implements Relation<W>
      *                  false if it has to be found on the list of second elements.
      *
      * @return the index of the element if it exists, - (insertpoint - 1) if it does not,
-     *         where insertpoint is the corresponding point where the element should be added.
+     * where insertpoint is the corresponding point where the element should be added.
      */
     private Integer binarySearch(int firstIdx, int secondIdx, boolean firstList)
     {
@@ -245,19 +248,13 @@ public abstract class FastUnweightedRelation<W> implements Relation<W>
     @Override
     public IntStream firstsWithSeconds()
     {
-        return IntStream.range(0, this.numFirst()).filter(i ->
-        {
-            return !this.secondIdxList.get(i).isEmpty();
-        });
+        return IntStream.range(0, this.numFirst()).filter(i -> !this.secondIdxList.get(i).isEmpty());
     }
 
     @Override
     public IntStream secondsWithFirsts()
     {
-        return IntStream.range(0, this.numSecond()).filter(i ->
-        {
-            return !this.firstIdxList.get(i).isEmpty();
-        });
+        return IntStream.range(0, this.numSecond()).filter(i -> !this.firstIdxList.get(i).isEmpty());
     }
 
     @Override
@@ -283,18 +280,12 @@ public abstract class FastUnweightedRelation<W> implements Relation<W>
     @Override
     public IntStream getIsolatedFirsts()
     {
-        return IntStream.range(0, this.numFirst()).filter(i ->
-        {
-            return this.secondIdxList.get(i).isEmpty();
-        });
+        return IntStream.range(0, this.numFirst()).filter(i -> this.secondIdxList.get(i).isEmpty());
     }
 
     @Override
     public IntStream getIsolatedSeconds()
     {
-        return IntStream.range(0, this.numSecond()).filter(i ->
-        {
-            return this.firstIdxList.get(i).isEmpty();
-        });
+        return IntStream.range(0, this.numSecond()).filter(i -> this.firstIdxList.get(i).isEmpty());
     }
 }

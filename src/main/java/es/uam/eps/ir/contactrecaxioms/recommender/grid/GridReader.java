@@ -1,7 +1,8 @@
 /*
- *  Copyright (C) 2016 Information Retrieval Group at Universidad Aut�noma
- *  de Madrid, http://ir.ii.uam.es
- * 
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
+ *
  *  This Source Code Form is subject to the terms of the Mozilla Public
  *  License, v. 2.0. If a copy of the MPL was not distributed with this
  *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -22,15 +23,16 @@ import static es.uam.eps.ir.contactrecaxioms.recommender.grid.BasicTypeIdentifie
 
 /**
  * Reads grids.
+ *
  * @author Javier Sanz-Cruzado Puig
  */
-public abstract class GridReader 
+public abstract class GridReader
 {
     /**
      * Identifier for the values of the parameter
      */
     private final static String VALUES = "values";
-    
+
     private final static String GRIDS = "grids";
     private final static String GRID = "grid";
     /**
@@ -65,10 +67,12 @@ public abstract class GridReader
      * Identifier for the parameter list
      */
     private final static String PARAMS = "param";
-    
+
     /**
      * Reads the possible values for the parameters of an algorithm.
+     *
      * @param parameters XML nodes containing the parameters information
+     *
      * @return The grid
      */
     protected Grid readParameterGrid(NodeList parameters)
@@ -80,14 +84,15 @@ public abstract class GridReader
         Map<String, List<Boolean>> booleanValues = new HashMap<>();
         Map<String, List<Long>> longValues = new HashMap<>();
         Map<String, Map<String, Grid>> gridValues = new HashMap<>();
-        
-        for(int i = 0; i < parameters.getLength(); ++i)
+
+        for (int i = 0; i < parameters.getLength(); ++i)
         {
             Element element = (Element) parameters.item(i);
             String parameterName = element.getElementsByTagName(NAME).item(0).getTextContent();
             String type = element.getElementsByTagName(TYPE).item(0).getTextContent();
-            
-            switch (type) {
+
+            switch (type)
+            {
                 case INTEGER_TYPE:
                 {
                     List<Integer> grid = readIntegerGrid((Element) element.getElementsByTagName(VALUES).item(0));
@@ -102,7 +107,7 @@ public abstract class GridReader
                 }
                 case STRING_TYPE:
                 {
-                    List<String> grid =  readStringGrid((Element) element.getElementsByTagName(VALUES).item(0));
+                    List<String> grid = readStringGrid((Element) element.getElementsByTagName(VALUES).item(0));
                     stringValues.put(parameterName, grid);
                     break;
                 }
@@ -136,229 +141,242 @@ public abstract class GridReader
                     break;
                 }
             }
-        }        
+        }
         return new Grid(doubleValues, orientationValues, stringValues, integerValues, booleanValues, longValues, gridValues);
-        
+
     }
-    
-    
-    
+
+
     /**
      * Reads integer values from a grid
+     *
      * @param element XML element containing the different possible values for an integer attribute
+     *
      * @return The list of integer values
      */
     protected List<Integer> readIntegerGrid(Element element)
     {
         List<Integer> values = new ArrayList<>();
-        
+
         //Case 1: Values
         NodeList valuesNodes = element.getElementsByTagName(VALUE);
-        if(valuesNodes.getLength() > 0)
+        if (valuesNodes.getLength() > 0)
         {
-            for(int i = 0; i < valuesNodes.getLength(); ++i)
+            for (int i = 0; i < valuesNodes.getLength(); ++i)
             {
                 String value = valuesNodes.item(i).getTextContent();
-                values.add(new Integer(value));
+                values.add(Integer.valueOf(value));
             }
         }
-        
+
         //Case 2: Ranges
         NodeList rangesNodes = element.getElementsByTagName(RANGE);
-        if(rangesNodes.getLength() > 0)
+        if (rangesNodes.getLength() > 0)
         {
-            for(int i = 0; i < rangesNodes.getLength(); ++i)
+            for (int i = 0; i < rangesNodes.getLength(); ++i)
             {
                 Element range = (Element) rangesNodes.item(i);
-                Integer start = new Integer(range.getElementsByTagName(START).item(0).getTextContent());
-                Integer end = new Integer(range.getElementsByTagName(END).item(0).getTextContent());
-                Integer step = new Integer(range.getElementsByTagName(STEP).item(0).getTextContent());
-                
-                for(int j = start; j <= end; j += step)
+                int start = Integer.parseInt(range.getElementsByTagName(START).item(0).getTextContent());
+                int end = Integer.parseInt(range.getElementsByTagName(END).item(0).getTextContent());
+                int step = Integer.parseInt(range.getElementsByTagName(STEP).item(0).getTextContent());
+
+                for (int j = start; j <= end; j += step)
                 {
                     values.add(j);
                 }
             }
         }
-        
+
         return values;
     }
 
-   /**
+    /**
      * Reads long values from a grid
+     *
      * @param element XML element containing the different possible values for a long attribute
+     *
      * @return The list of long values
      */
     protected List<Long> readLongGrid(Element element)
     {
         List<Long> values = new ArrayList<>();
-        
+
         //Case 1: Values
         NodeList valuesNodes = element.getElementsByTagName(VALUE);
-        if(valuesNodes.getLength() > 0)
+        if (valuesNodes.getLength() > 0)
         {
-            for(int i = 0; i < valuesNodes.getLength(); ++i)
+            for (int i = 0; i < valuesNodes.getLength(); ++i)
             {
                 String value = valuesNodes.item(i).getTextContent();
-                values.add(new Long(value));
+                values.add(Long.valueOf(value));
             }
         }
-        
+
         //Case 2: Ranges
         NodeList rangesNodes = element.getElementsByTagName(RANGE);
-        if(rangesNodes.getLength() > 0)
+        if (rangesNodes.getLength() > 0)
         {
-            for(int i = 0; i < rangesNodes.getLength(); ++i)
+            for (int i = 0; i < rangesNodes.getLength(); ++i)
             {
                 Element range = (Element) rangesNodes.item(i);
-                Long start = new Long(range.getElementsByTagName(START).item(0).getTextContent());
-                Long end = new Long(range.getElementsByTagName(END).item(0).getTextContent());
-                Long step = new Long(range.getElementsByTagName(STEP).item(0).getTextContent());
-                
-                for(long j = start; j <= end; j += step)
+                long start = Long.parseLong(range.getElementsByTagName(START).item(0).getTextContent());
+                long end = Long.parseLong(range.getElementsByTagName(END).item(0).getTextContent());
+                long step = Long.parseLong(range.getElementsByTagName(STEP).item(0).getTextContent());
+
+                for (long j = start; j <= end; j += step)
                 {
                     values.add(j);
                 }
             }
         }
-        
+
         return values;
     }
-    
-   /**
+
+    /**
      * Reads double values from a grid
+     *
      * @param element XML element containing the different possible values for a double attribute
+     *
      * @return The list of double values
      */
     protected List<Double> readDoubleGrid(Element element)
     {
         List<Double> values = new ArrayList<>();
-        
+
         //Case 1: Values
         NodeList valuesNodes = element.getElementsByTagName(VALUE);
-        if(valuesNodes.getLength() > 0)
+        if (valuesNodes.getLength() > 0)
         {
-            for(int i = 0; i < valuesNodes.getLength(); ++i)
+            for (int i = 0; i < valuesNodes.getLength(); ++i)
             {
                 String value = valuesNodes.item(i).getTextContent();
-                values.add(new Double(value));
+                values.add(Double.valueOf(value));
             }
         }
-        
+
         //Case 2: Ranges
         NodeList rangesNodes = element.getElementsByTagName(RANGE);
-        if(rangesNodes.getLength() > 0)
+        if (rangesNodes.getLength() > 0)
         {
-            for(int i = 0; i < rangesNodes.getLength(); ++i)
+            for (int i = 0; i < rangesNodes.getLength(); ++i)
             {
                 Element range = (Element) rangesNodes.item(i);
-                Double start = new Double(range.getElementsByTagName(START).item(0).getTextContent());
-                Double end = new Double(range.getElementsByTagName(END).item(0).getTextContent());
-                Double step = new Double(range.getElementsByTagName(STEP).item(0).getTextContent());
-                
-                for(double j = start; j <= end; j += step)
+                double start = Double.parseDouble(range.getElementsByTagName(START).item(0).getTextContent());
+                double end = Double.parseDouble(range.getElementsByTagName(END).item(0).getTextContent());
+                double step = Double.parseDouble(range.getElementsByTagName(STEP).item(0).getTextContent());
+
+                for (double j = start; j <= end; j += step)
                 {
                     values.add(j);
                 }
-                
-                if(!values.contains(end))
+
+                if (!values.contains(end))
                     values.add(end);
             }
         }
-        
+
         return values;
     }
 
     /**
      * Reads string values from a grid
+     *
      * @param element XML element containing the different possible values for a string attribute
+     *
      * @return The list of string values
      */
     protected List<String> readStringGrid(Element element)
     {
         List<String> values = new ArrayList<>();
-        
+
         //Case 1: Values
         NodeList valuesNodes = element.getElementsByTagName(VALUE);
-        if(valuesNodes.getLength() > 0)
+        if (valuesNodes.getLength() > 0)
         {
-            for(int i = 0; i < valuesNodes.getLength(); ++i)
+            for (int i = 0; i < valuesNodes.getLength(); ++i)
             {
                 String value = valuesNodes.item(i).getTextContent();
                 values.add(value);
             }
         }
-        
+
         return values;
     }
 
     /**
      * Reads boolean values from a grid
+     *
      * @param element XML element containing the different possible values for a boolean attribute
+     *
      * @return The list of boolean values
      */
     protected List<Boolean> readBooleanGrid(Element element)
     {
         List<Boolean> values = new ArrayList<>();
-        
+
         //Case 1: Values
         NodeList valuesNodes = element.getElementsByTagName(VALUE);
-        if(valuesNodes.getLength() > 0)
+        if (valuesNodes.getLength() > 0)
         {
-            for(int i = 0; i < valuesNodes.getLength(); ++i)
+            for (int i = 0; i < valuesNodes.getLength(); ++i)
             {
                 String value = valuesNodes.item(i).getTextContent();
                 values.add(value.equalsIgnoreCase("true"));
             }
         }
-        
+
         return values;
     }
-    
+
     /**
      * Reads a grid of grids.
+     *
      * @param element XML element containing the different possible values for a Grid.
+     *
      * @return The list of grids.
      */
     protected Map<String, Grid> readGridGrid(Element element)
     {
-        Map<String,Grid> values = new HashMap<>();
+        Map<String, Grid> values = new HashMap<>();
         NodeList valuesNodes = element.getElementsByTagName(GRID);
-        if(valuesNodes.getLength() > 0)
+        if (valuesNodes.getLength() > 0)
         {
-            for(int i = 0; i < valuesNodes.getLength(); ++i)
+            for (int i = 0; i < valuesNodes.getLength(); ++i)
             {
                 Element value = (Element) valuesNodes.item(i);
                 String name = value.getElementsByTagName(NAME).item(0).getTextContent();
                 NodeList params = value.getElementsByTagName(PARAMS);
                 Grid grid = this.readParameterGrid(params);
-                values.put(name, grid);            
+                values.put(name, grid);
             }
         }
         return values;
-        
+
     }
-    
+
     /**
      * Reads edge orientation values from a grid
+     *
      * @param element XML element containing the different possible values for an orientation attribute
+     *
      * @return The list of edge orientation values
      */
     protected List<EdgeOrientation> readOrientationGrid(Element element)
     {
         List<EdgeOrientation> values = new ArrayList<>();
-        
+
         //Case 1: Values
         NodeList valuesNodes = element.getElementsByTagName(VALUE);
-        if(valuesNodes.getLength() > 0)
+        if (valuesNodes.getLength() > 0)
         {
-            for(int i = 0; i < valuesNodes.getLength(); ++i)
+            for (int i = 0; i < valuesNodes.getLength(); ++i)
             {
                 String value = valuesNodes.item(i).getTextContent();
                 values.add(EdgeOrientation.valueOf(value));
             }
         }
-        
+
         return values;
     }
 }

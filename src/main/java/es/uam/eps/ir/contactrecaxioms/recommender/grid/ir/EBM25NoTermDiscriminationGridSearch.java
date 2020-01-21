@@ -1,13 +1,13 @@
 /*
- *  Copyright (C) 2016 Information Retrieval Group at Universidad Aut�noma
- *  de Madrid, http://ir.ii.uam.es
- * 
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
+ *
  *  This Source Code Form is subject to the terms of the Mozilla Public
  *  License, v. 2.0. If a copy of the MPL was not distributed with this
  *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package es.uam.eps.ir.contactrecaxioms.recommender.grid.ir;
-
 
 
 import es.uam.eps.ir.contactrecaxioms.graph.edges.EdgeOrientation;
@@ -29,8 +29,10 @@ import static es.uam.eps.ir.contactrecaxioms.recommender.grid.AlgorithmIdentifie
 
 /**
  * Grid search generator for the Extreme BM25 algorithm (Term-based version).
- * @author Javier Sanz-Cruzado Puig
+ *
  * @param <U> Type of the users.
+ *
+ * @author Javier Sanz-Cruzado Puig
  */
 public class EBM25NoTermDiscriminationGridSearch<U> implements AlgorithmGridSearch<U>
 {
@@ -51,33 +53,22 @@ public class EBM25NoTermDiscriminationGridSearch<U> implements AlgorithmGridSear
      * Identifier for the orientation for the document length
      */
     private static final String DLSEL = "dlSel";
-    
+
     @Override
-    public Map<String, Supplier<Recommender<U, U>>> grid(Grid grid, FastGraph<U> graph, FastPreferenceData<U,U> prefData)
+    public Map<String, Supplier<Recommender<U, U>>> grid(Grid grid, FastGraph<U> graph, FastPreferenceData<U, U> prefData)
     {
-        Map<String, Supplier<Recommender<U,U>>> recs = new HashMap<>();
+        Map<String, Supplier<Recommender<U, U>>> recs = new HashMap<>();
         List<Double> bs = grid.getDoubleValues(B);
         List<EdgeOrientation> uSels = grid.getOrientationValues(USEL);
         List<EdgeOrientation> vSels = grid.getOrientationValues(VSEL);
         List<EdgeOrientation> dlSels = grid.getOrientationValues(DLSEL);
-        
-        bs.stream().forEach(b -> 
-        {
-            uSels.stream().forEach(uSel -> 
-            {
-                vSels.stream().forEach(vSel -> 
-                {
-                    dlSels.stream().forEach(dlSel ->
-                    {
-                        recs.put(EBM25NOTD + "_" + uSel + "_" + vSel + "_" + dlSel + "_" + b, () ->
-                        {
-                           return new EBM25NoTermDiscrimination<>(graph, uSel, vSel, dlSel, b);
-                        });
-                    });
-                });
-            });
-        });
-        
+
+        bs.forEach(b ->
+            uSels.forEach(uSel ->
+                vSels.forEach(vSel ->
+                    dlSels.forEach(dlSel ->
+                        recs.put(EBM25NOTD + "_" + uSel + "_" + vSel + "_" + dlSel + "_" + b, () ->new EBM25NoTermDiscrimination<>(graph, uSel, vSel, dlSel, b))))));
+
         return recs;
     }
 
@@ -89,25 +80,14 @@ public class EBM25NoTermDiscriminationGridSearch<U> implements AlgorithmGridSear
         List<EdgeOrientation> uSels = grid.getOrientationValues(USEL);
         List<EdgeOrientation> vSels = grid.getOrientationValues(VSEL);
         List<EdgeOrientation> dlSels = grid.getOrientationValues(DLSEL);
-        
-        bs.stream().forEach(b -> 
-        {
-            uSels.stream().forEach(uSel -> 
-            {
-                vSels.stream().forEach(vSel -> 
-                {
-                    dlSels.stream().forEach(dlSel ->
-                    {
-                        recs.put(EBM25NOTD + "_" + uSel + "_" + vSel + "_" + dlSel + "_" + b, (graph, prefData) ->
-                        {
-                           return new EBM25NoTermDiscrimination<>(graph, uSel, vSel, dlSel, b);
-                        });
-                    });
-                });
-            });
-        });
-        
+
+        bs.forEach(b ->
+            uSels.forEach(uSel ->
+                vSels.forEach(vSel ->
+                    dlSels.forEach(dlSel ->
+                        recs.put(EBM25NOTD + "_" + uSel + "_" + vSel + "_" + dlSel + "_" + b, (graph, prefData) ->new EBM25NoTermDiscrimination<>(graph, uSel, vSel, dlSel, b))))));
+
         return recs;
     }
-    
+
 }

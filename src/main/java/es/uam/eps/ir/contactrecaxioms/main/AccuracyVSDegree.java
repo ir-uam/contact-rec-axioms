@@ -1,3 +1,12 @@
+/*
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
+ *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 package es.uam.eps.ir.contactrecaxioms.main;
 
 import es.uam.eps.ir.contactrecaxioms.data.GraphSimpleFastPreferenceData;
@@ -30,7 +39,10 @@ import org.ranksys.formats.rec.RecommendationFormat;
 import org.ranksys.formats.rec.TRECRecommendationFormat;
 
 import java.io.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Supplier;
@@ -51,20 +63,21 @@ public class AccuracyVSDegree
     /**
      * Program that reproduces the experiments for the NDC axiom.
      * Generates a file comparing weigthed and unweighted algorithm variants.
+     *
      * @param args Execution arguments:
-     *        <ol>
-     *          <li><b>Train:</b> Route to the file containing the training graph.</li>
-     *          <li><b>Test:</b> Route to the file containing the test links.</li>
-     *          <li><b>Algorithms:</b> Route to an XML file containing the recommender configurations</li>
-     *          <li><b>Output directory:</b> Directory in which to store the recommendations and the output file.</li>
-     *          <li><b>Directed:</b> True if the network is directed, false otherwise.</li>
-     *          <li><b>Weighted:</b> True if the network is weighted, false otherwise.</li>
-     *          <li><b>Max. Length:</b> Maximum number of recommendations per user.</li>
-     *        </ol>
+     *             <ol>
+     *               <li><b>Train:</b> Route to the file containing the training graph.</li>
+     *               <li><b>Test:</b> Route to the file containing the test links.</li>
+     *               <li><b>Algorithms:</b> Route to an XML file containing the recommender configurations</li>
+     *               <li><b>Output directory:</b> Directory in which to store the recommendations and the output file.</li>
+     *               <li><b>Directed:</b> True if the network is directed, false otherwise.</li>
+     *               <li><b>Weighted:</b> True if the network is weighted, false otherwise.</li>
+     *               <li><b>Max. Length:</b> Maximum number of recommendations per user.</li>
+     *             </ol>
      */
-    public static void main(String args[])
+    public static void main(String[] args)
     {
-        if(args.length < 7)
+        if (args.length < 7)
         {
             System.err.println("Invalid arguments.");
             System.err.println("Usage:");
@@ -94,14 +107,14 @@ public class AccuracyVSDegree
         // Read the training graph.
         TextGraphReader<Long> greader = new TextGraphReader<>(directed, weighted, false, "\t", Parsers.lp);
         Graph<Long> auxgraph = greader.read(trainDataPath, weighted, false);
-        if(auxgraph == null)
+        if (auxgraph == null)
         {
             System.err.println("ERROR: Could not read the training graph");
             return;
         }
 
         FastGraph<Long> graph = (FastGraph<Long>) Adapters.removeAutoloops(auxgraph);
-        if(graph == null)
+        if (graph == null)
         {
             System.err.println("ERROR: Could not remove autoloops from the training graph");
             return;
@@ -110,14 +123,14 @@ public class AccuracyVSDegree
         // Read the test graph.
         auxgraph = greader.read(testDataPath, false, false);
         FastGraph<Long> testGraph = (FastGraph<Long>) Adapters.onlyTrainUsers(auxgraph, graph);
-        if(testGraph == null)
+        if (testGraph == null)
         {
             System.err.println("ERROR: Could not remove users from the test graph");
             return;
         }
 
         long timeb = System.currentTimeMillis();
-        System.out.println("Data read (" +(timeb-timea) + " ms.)");
+        System.out.println("Data read (" + (timeb - timea) + " ms.)");
         timea = System.currentTimeMillis();
 
         // Read the training and test data
@@ -132,7 +145,7 @@ public class AccuracyVSDegree
         AlgorithmGridReader gridreader = new AlgorithmGridReader(algorithmsPath);
         gridreader.readDocument();
 
-        Map<String, Supplier<Recommender<Long,Long>>> recMap = new HashMap<>();
+        Map<String, Supplier<Recommender<Long, Long>>> recMap = new HashMap<>();
         // Get the different recommenders to execute
         gridreader.getAlgorithms().forEach(algorithm ->
         {
@@ -141,17 +154,17 @@ public class AccuracyVSDegree
         });
 
         timeb = System.currentTimeMillis();
-        System.out.println("Algorithms selected (" +(timeb-timea) + " ms.)");
+        System.out.println("Algorithms selected (" + (timeb - timea) + " ms.)");
 
         // Select the set of users to be recommended, the format, and the filters to apply to the recommendation
         Set<Long> targetUsers = testData.getUsersWithPreferences().collect(Collectors.toCollection(HashSet::new));
 
         System.out.println("Num. target users: " + targetUsers.size());
-        RecommendationFormat<Long, Long> format = new TRECRecommendationFormat<>(lp,lp);
+        RecommendationFormat<Long, Long> format = new TRECRecommendationFormat<>(lp, lp);
 
-        Function<Long, IntPredicate> filter = FastFilters.and(FastFilters.notInTrain(trainData), FastFilters.notSelf(index), SocialFastFilters.notReciprocal(graph,index));
+        @SuppressWarnings("unchecked") Function<Long, IntPredicate> filter = FastFilters.and(FastFilters.notInTrain(trainData), FastFilters.notSelf(index), SocialFastFilters.notReciprocal(graph, index));
 
-        RecommenderRunner<Long,Long> runner = new FastFilterRecommenderRunner<>(index, index, targetUsers.stream(), filter, maxLength);
+        RecommenderRunner<Long, Long> runner = new FastFilterRecommenderRunner<>(index, index, targetUsers.stream(), filter, maxLength);
 
         // Execute the recommendations
         recMap.entrySet().parallelStream().forEach(entry ->
@@ -177,11 +190,11 @@ public class AccuracyVSDegree
 
             // Prepare the recommender
             System.out.println("Preparing " + name);
-            Supplier<Recommender<Long,Long>> recomm = entry.getValue();
+            Supplier<Recommender<Long, Long>> recomm = entry.getValue();
             long a = System.currentTimeMillis();
             Recommender<Long, Long> rec = recomm.get();
             long b = System.currentTimeMillis();
-            System.out.println("Prepared " + name + " (" + (b-a) + " ms.)");
+            System.out.println("Prepared " + name + " (" + (b - a) + " ms.)");
 
             // Write the recommendations
             RecommendationFormat.Writer<Long, Long> writer;
@@ -214,23 +227,23 @@ public class AccuracyVSDegree
                 outDegreeValues.put(name, outDegree.evaluate());
                 undDegreeValues.put(name, degree.evaluate());
             }
-            catch(IOException ioe)
+            catch (IOException ioe)
             {
                 System.err.println("Algorithm " + name + " failed");
             }
         });
 
         // Write everything in the file
-        try(BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputPath+"degrees.txt"))))
+        try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputPath + "degrees.txt"))))
         {
             bw.write("Algorithm\tnDCG@" + maxLength + "\tIn-degree@" + maxLength + "\tOut-degree@" + maxLength + "\tDegree@" + maxLength);
             Set<String> algs = nDCGvalues.keySet();
-            for(String alg : algs)
+            for (String alg : algs)
             {
-                bw.write("\n"+ alg + "\t" + inDegreeValues.get(alg) + "\t" + outDegreeValues.get(alg) + "\t" + undDegreeValues.get(alg));
+                bw.write("\n" + alg + "\t" + inDegreeValues.get(alg) + "\t" + outDegreeValues.get(alg) + "\t" + undDegreeValues.get(alg));
             }
         }
-        catch(IOException ioe)
+        catch (IOException ioe)
         {
             System.err.println("Something failed while writing the results file");
         }

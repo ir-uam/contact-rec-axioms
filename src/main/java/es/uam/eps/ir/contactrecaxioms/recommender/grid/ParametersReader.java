@@ -1,7 +1,8 @@
 /*
- *  Copyright (C) 2016 Information Retrieval Group at Universidad Aut�noma
- *  de Madrid, http://ir.ii.uam.es
- * 
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
+ *
  *  This Source Code Form is subject to the terms of the Mozilla Public
  *  License, v. 2.0. If a copy of the MPL was not distributed with this
  *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -22,9 +23,10 @@ import static org.w3c.dom.Node.ELEMENT_NODE;
 
 /**
  * Reads parameters.
+ *
  * @author Javier Sanz-Cruzado Puig
  */
-public abstract class ParametersReader 
+public abstract class ParametersReader
 {
     /**
      * Identifier for the values.
@@ -50,10 +52,12 @@ public abstract class ParametersReader
      * Identifier for the grid.
      */
     private final static String GRID = "grid";
-    
+
     /**
      * Reads the possible values for the parameters of an algorithm.
+     *
      * @param parameters XML nodes containing the parameters information
+     *
      * @return The grid
      */
     protected Parameters readParameterGrid(NodeList parameters)
@@ -64,17 +68,18 @@ public abstract class ParametersReader
         Map<String, Integer> integerValues = new HashMap<>();
         Map<String, Boolean> booleanValues = new HashMap<>();
         Map<String, Long> longValues = new HashMap<>();
-        Map<String, Tuple2oo<String,Parameters>> recursiveValues = new HashMap<>();
-        
-        for(int i = 0; i < parameters.getLength(); ++i)
+        Map<String, Tuple2oo<String, Parameters>> recursiveValues = new HashMap<>();
+
+        for (int i = 0; i < parameters.getLength(); ++i)
         {
-            if(parameters.item(i).getNodeType() == ELEMENT_NODE)
+            if (parameters.item(i).getNodeType() == ELEMENT_NODE)
             {
                 Element element = (Element) parameters.item(i);
                 String parameterName = element.getElementsByTagName(NAME).item(0).getTextContent();
                 String type = element.getElementsByTagName(TYPE).item(0).getTextContent();
 
-                switch (type) {
+                switch (type)
+                {
                     case INTEGER_TYPE:
                     {
                         Integer value = readIntegerGrid((Element) element.getElementsByTagName(VALUE).item(0));
@@ -89,7 +94,7 @@ public abstract class ParametersReader
                     }
                     case STRING_TYPE:
                     {
-                        String value =  readStringGrid((Element) element.getElementsByTagName(VALUE).item(0));
+                        String value = readStringGrid((Element) element.getElementsByTagName(VALUE).item(0));
                         stringValues.put(parameterName, value);
                         break;
                     }
@@ -113,7 +118,7 @@ public abstract class ParametersReader
                     }
                     case GRID_TYPE:
                     {
-                        Tuple2oo<String,Parameters> params = readParametersGrid((Element) element.getElementsByTagName(VALUE).item(0));
+                        Tuple2oo<String, Parameters> params = readParametersGrid((Element) element.getElementsByTagName(VALUE).item(0));
                         recursiveValues.put(parameterName, params);
                         break;
                     }
@@ -124,14 +129,16 @@ public abstract class ParametersReader
                     }
                 }
             }
-        }        
+        }
         return new Parameters(doubleValues, orientationValues, stringValues, integerValues, booleanValues, longValues, recursiveValues);
-        
+
     }
 
     /**
      * Reads an integer value from the parameters file.
+     *
      * @param element XML element containing the value for the attribute
+     *
      * @return The integer value
      */
     protected Integer readIntegerGrid(Element element)
@@ -142,7 +149,9 @@ public abstract class ParametersReader
 
     /**
      * Reads a long value from the parameters file.
+     *
      * @param element XML element containing the value for the attribute
+     *
      * @return The long value
      */
     protected Long readLongGrid(Element element)
@@ -150,10 +159,12 @@ public abstract class ParametersReader
         String value = element.getTextContent();
         return Parsers.lp.parse(value);
     }
-    
+
     /**
      * Reads a long value from the parameters file.
+     *
      * @param element XML element containing the value for the attribute
+     *
      * @return The long value
      */
     protected Double readDoubleGrid(Element element)
@@ -161,21 +172,24 @@ public abstract class ParametersReader
         String value = element.getTextContent();
         return Parsers.dp.parse(value);
     }
-    
+
     /**
      * Reads a string value from the parameters file.
+     *
      * @param element XML element containing the value for the attribute
+     *
      * @return The string value
      */
     protected String readStringGrid(Element element)
     {
-        String value = element.getTextContent();
-        return value;
+        return element.getTextContent();
     }
-    
+
     /**
      * Reads a boolean value from the parameters file.
+     *
      * @param element XML element containing the value for the attribute
+     *
      * @return The boolean value
      */
     protected Boolean readBooleanGrid(Element element)
@@ -183,10 +197,12 @@ public abstract class ParametersReader
         String value = element.getTextContent();
         return value.equalsIgnoreCase("true");
     }
-    
+
     /**
      * Reads an orientation value from the parameters file.
+     *
      * @param element XML element containing the value for the attribute
+     *
      * @return The orientation value
      */
     protected EdgeOrientation readOrientationGrid(Element element)
@@ -195,7 +211,7 @@ public abstract class ParametersReader
         return EdgeOrientation.valueOf(value);
     }
 
-    protected Tuple2oo<String,Parameters> readParametersGrid(Element element) 
+    protected Tuple2oo<String, Parameters> readParametersGrid(Element element)
     {
         NodeList valuesNodes = element.getElementsByTagName(GRID);
         Element value = (Element) valuesNodes.item(0);

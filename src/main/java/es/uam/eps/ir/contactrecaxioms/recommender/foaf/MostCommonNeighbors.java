@@ -1,7 +1,8 @@
-/* 
- *  Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
- *  de Madrid, http://ir.ii.uam.es
- * 
+/*
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
+ *
  *  This Source Code Form is subject to the terms of the Mozilla Public
  *  License, v. 2.0. If a copy of the MPL was not distributed with this
  *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -16,14 +17,15 @@ import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 
 /**
  * Most Common Neighbours (MCN) recommender. Recommends the users that share the maximum number of neighbours with the target user.
- *
+ * <p>
  * Liben-Nowell, D., Kleinberg, J. The Link Prediction Problem for Social Networks. Journal of the American Society for Information Science and Technology 58(7), May 2007.
  * Newman, M.E.J. Clustering and Preferential Attachment in Growing Networks. Physical Review Letters E, 64(025102), April 2001.
  * *
+ *
+ * @param <U> type of the users.
+ *
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
  * @author Pablo Castells (pablo.castells@uam.es)
- * 
- * @param <U> type of the users.
  */
 public class MostCommonNeighbors<U> extends UserFastRankingRecommender<U>
 {
@@ -38,9 +40,10 @@ public class MostCommonNeighbors<U> extends UserFastRankingRecommender<U>
 
     /**
      * Constructor.
+     *
      * @param graph User graph.
-     * @param uSel Link orientation for the target users.
-     * @param vSel Link orientation for the candidate users.
+     * @param uSel  Link orientation for the target users.
+     * @param vSel  Link orientation for the candidate users.
      */
     public MostCommonNeighbors(FastGraph<U> graph, EdgeOrientation uSel, EdgeOrientation vSel)
     {
@@ -50,19 +53,15 @@ public class MostCommonNeighbors<U> extends UserFastRankingRecommender<U>
     }
 
     @Override
-    public Int2DoubleMap getScoresMap(int uidx) 
+    public Int2DoubleMap getScoresMap(int uidx)
     {
         Int2DoubleOpenHashMap scoresMap = new Int2DoubleOpenHashMap();
         scoresMap.defaultReturnValue(0.0);
-        
-        graph.getNeighborhood(uidx, uSel).forEach(widx -> 
-        {
-            graph.getNeighborhood(widx, vSel).forEach(vidx -> 
-            {
-                scoresMap.addTo(vidx, 1.0);
-            });
-        });
-       
+
+        graph.getNeighborhood(uidx, uSel).forEach(widx ->
+            graph.getNeighborhood(widx, vSel).forEach(vidx ->
+                scoresMap.addTo(vidx, 1.0)));
+
         return scoresMap;
     }
 }

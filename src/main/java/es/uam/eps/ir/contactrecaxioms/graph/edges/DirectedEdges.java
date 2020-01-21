@@ -1,14 +1,15 @@
 /*
- * Copyright (C) 2019 Information Retrieval Group at Universidad Autónoma
- * de Madrid, http://ir.ii.uam.es.
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, you can obtain one at http://mozilla.org/MPL/2.0.
- *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package es.uam.eps.ir.contactrecaxioms.graph.edges;
 
+import es.uam.eps.ir.contactrecaxioms.graph.index.IdxValue;
 import es.uam.eps.ir.contactrecaxioms.utils.OrderedListCombiner;
 import es.uam.eps.ir.ranksys.fast.preference.IdxPref;
 
@@ -45,7 +46,7 @@ public interface DirectedEdges extends Edges
     {
         Iterator<IdxPref> iteratorIncident = this.getIncidentWeights(node).iterator();
         Iterator<IdxPref> iteratorAdjacent = this.getAdjacentWeights(node).iterator();
-        return OrderedListCombiner.intersectLists(iteratorIncident, iteratorAdjacent, (x, y) -> (x.v1 - y.v1), (x, y) -> y).stream();
+        return OrderedListCombiner.intersectLists(iteratorIncident, iteratorAdjacent, Comparator.comparingInt(x -> x.v1), (x, y) -> y).stream();
     }
 
     @Override
@@ -53,7 +54,7 @@ public interface DirectedEdges extends Edges
     {
         Iterator<IdxPref> iteratorIncident = this.getIncidentWeights(node).iterator();
         Iterator<IdxPref> iteratorAdjacent = this.getAdjacentWeights(node).iterator();
-        return OrderedListCombiner.intersectLists(iteratorIncident, iteratorAdjacent, (x, y) -> (x.v1 - y.v1), (x, y) -> x).stream();
+        return OrderedListCombiner.intersectLists(iteratorIncident, iteratorAdjacent, Comparator.comparingInt(x -> x.v1), (x, y) -> x).stream();
     }
 
     @Override
@@ -62,7 +63,7 @@ public interface DirectedEdges extends Edges
         Iterator<IdxPref> iteratorIncident = this.getIncidentWeights(node).iterator();
         Iterator<IdxPref> iteratorAdjacent = this.getAdjacentWeights(node).iterator();
 
-        return OrderedListCombiner.intersectLists(iteratorIncident, iteratorAdjacent, (x, y) -> (x.v1 - y.v1), (x, y) -> new IdxPref(x.v1, (x.v2 + y.v2) / 2.0)).stream();
+        return OrderedListCombiner.intersectLists(iteratorIncident, iteratorAdjacent, Comparator.comparingInt(x -> x.v1), (x, y) -> new IdxPref(x.v1, (x.v2 + y.v2) / 2.0)).stream();
     }
 
     @Override
@@ -71,7 +72,7 @@ public interface DirectedEdges extends Edges
         Iterator<EdgeType> iteratorIncident = this.getIncidentTypes(node).iterator();
         Iterator<EdgeType> iteratorAdjacent = this.getAdjacentTypes(node).iterator();
 
-        return OrderedListCombiner.intersectLists(iteratorIncident, iteratorAdjacent, (x, y) -> (x.getIdx() - y.getIdx()), (x, y) -> y).stream();
+        return OrderedListCombiner.intersectLists(iteratorIncident, iteratorAdjacent, Comparator.comparingInt(IdxValue::getIdx), (x, y) -> y).stream();
     }
 
     @Override
@@ -79,7 +80,7 @@ public interface DirectedEdges extends Edges
     {
         Iterator<EdgeType> iteratorIncident = this.getIncidentTypes(node).iterator();
         Iterator<EdgeType> iteratorAdjacent = this.getAdjacentTypes(node).iterator();
-        return OrderedListCombiner.intersectLists(iteratorIncident, iteratorAdjacent, (x, y) -> (x.getIdx() - y.getIdx()), (x, y) -> x).stream();
+        return OrderedListCombiner.intersectLists(iteratorIncident, iteratorAdjacent, Comparator.comparingInt(IdxValue::getIdx), (x, y) -> x).stream();
     }
 
     @Override

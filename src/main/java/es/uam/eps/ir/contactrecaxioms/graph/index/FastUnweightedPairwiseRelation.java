@@ -1,18 +1,15 @@
 /*
- * Copyright (C) 2019 Information Retrieval Group at Universidad Autónoma
- * de Madrid, http://ir.ii.uam.es.
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, you can obtain one at http://mozilla.org/MPL/2.0.
- *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package es.uam.eps.ir.contactrecaxioms.graph.index;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -64,18 +61,18 @@ public class FastUnweightedPairwiseRelation<W> extends FastUnweightedRelation<W>
         for (int i = 0; i < size; ++i)
         {
             List<Integer> list = this.secondIdxList.get(i);
-            for (int j = 0; j < list.size(); ++j)
+            for (Integer integer : list)
             {
-                this.firstIdxList.get(list.get(j)).add(i);
+                this.firstIdxList.get(integer).add(i);
             }
         }
 
         // Sorts the lists.
         firstIdxList.parallelStream()
-                .filter(l -> l != null)
+                .filter(Objects::nonNull)
                 .forEach(l -> l.sort(Comparator.naturalOrder()));
         secondIdxList.parallelStream()
-                .filter(l -> l != null)
+                .filter(Objects::nonNull)
                 .forEach(l -> l.sort(Comparator.naturalOrder()));
     }
 
@@ -216,7 +213,8 @@ public class FastUnweightedPairwiseRelation<W> extends FastUnweightedRelation<W>
     @Override
     public boolean containsPair(int firstIdx, int secondIdx)
     {
-        return this.binarySearch(firstIdx, secondIdx, true) > 0;
+        Integer res = this.binarySearch(firstIdx, secondIdx, true);
+        return res != null && res > 0;
     }
 
     @Override
@@ -242,14 +240,17 @@ public class FastUnweightedPairwiseRelation<W> extends FastUnweightedRelation<W>
         }
         else // the relation has to be created
         {
-            int idx = Math.abs(value + 1);
-            this.firstIdxList.get(secondIdx).add(idx, firstIdx);
-        }
+            int auxvalue = value;
 
-        value = this.binarySearch(firstIdx, secondIdx, false);
-        int idx = Math.abs(value + 1);
-        this.secondIdxList.get(firstIdx).add(idx, secondIdx);
-        return true;
+            value = this.binarySearch(firstIdx, secondIdx, false);
+            if(value == null || value >= 0) return false;
+
+            int idx = Math.abs(auxvalue + 1);
+            this.firstIdxList.get(secondIdx).add(idx, firstIdx);
+            idx = Math.abs(value + 1);
+            this.secondIdxList.get(firstIdx).add(idx, secondIdx);
+            return true;
+        }
     }
 
     @Override
@@ -281,7 +282,7 @@ public class FastUnweightedPairwiseRelation<W> extends FastUnweightedRelation<W>
      *                  false if it has to be found on the list of second elements.
      *
      * @return the index of the element if it exists, - (insertpoint - 1) if it does not,
-     *         where insertpoint is the corresponding point where the element should be added.
+     * where insertpoint is the corresponding point where the element should be added.
      */
     private Integer binarySearch(int firstIdx, int secondIdx, boolean firstList)
     {

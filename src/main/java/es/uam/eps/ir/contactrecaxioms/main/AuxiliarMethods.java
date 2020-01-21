@@ -1,9 +1,20 @@
+/*
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
+ *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 package es.uam.eps.ir.contactrecaxioms.main;
 
+import es.uam.eps.ir.ranksys.core.Recommendation;
 import es.uam.eps.ir.ranksys.metrics.SystemMetric;
 import es.uam.eps.ir.ranksys.rec.Recommender;
 import es.uam.eps.ir.ranksys.rec.runner.RecommenderRunner;
 import org.jooq.lambda.tuple.Tuple2;
+import org.ranksys.formats.parsing.Parsers;
 import org.ranksys.formats.rec.RecommendationFormat;
 import org.ranksys.formats.rec.SimpleRecommendationFormat;
 
@@ -14,8 +25,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static org.ranksys.formats.parsing.Parsers.lp;
+import java.util.stream.Stream;
 
 /**
  * Class containing auxiliar methods for the Main functions.
@@ -29,16 +39,19 @@ public class AuxiliarMethods
 {
     /**
      * Computes a recommendation and evaluates it using nDCG metric.
-     * @param output Route of the file in which to store the recommendation.
+     *
+     * @param output      Route of the file in which to store the recommendation.
      * @param recommender The recommender to apply.
-     * @param runner The recommender runner
-     * @param metric The metric.
+     * @param runner      The recommender runner
+     * @param metric      The metric.
+     *
      * @return the value of the metric.
+     *
      * @throws IOException if something fails during the writing / reading of the recommendation file.
      */
-    public static double computeAndEvaluate(String output, Recommender<Long,Long> recommender, RecommenderRunner<Long, Long> runner, SystemMetric<Long, Long> metric) throws IOException
+    public static double computeAndEvaluate(String output, Recommender<Long, Long> recommender, RecommenderRunner<Long, Long> runner, SystemMetric<Long, Long> metric) throws IOException
     {
-        RecommendationFormat<Long, Long> format = new SimpleRecommendationFormat<>(lp,lp);
+        RecommendationFormat<Long, Long> format = new SimpleRecommendationFormat<>(Parsers.lp, Parsers.lp);
         RecommendationFormat.Writer<Long, Long> writer;
         RecommendationFormat.Reader<Long, Long> reader;
 
@@ -49,24 +62,44 @@ public class AuxiliarMethods
         writer.close();
 
         reader = format.getReader(output);
-        reader.readAll().forEach(r -> metric.add(r));
+        reader.readAll().forEach(metric::add);
+        return metric.evaluate();
+    }
+
+    /**
+     * Computes a recommendation and evaluates it using nDCG metric. It does not write the recommendation.
+     *
+     * @param recommender The recommender to apply.
+     * @param runner      The recommender runner.
+     * @param metric      The metric.
+     *
+     * @return the value of the metric.
+     */
+    public static double computeAndEvaluate(Recommender<Long, Long> recommender, RecommenderRunner<Long, Long> runner, SystemMetric<Long, Long> metric)
+    {
+        EmptyWriter<Long, Long> writer = new EmptyWriter<>();
+        runner.run(recommender, writer);
+
+        metric.reset();
+        writer.readAll().forEach(metric::add);
         return metric.evaluate();
     }
 
     /**
      * Given two maps with the same keys, generates a new file that prints the nDCG values for both.
-     * @param output The output file.
-     * @param first the first map.
-     * @param second the second map.
-     * @param firstId identifier for the first map.
-     * @param secondId identifier for the second map.
+     *
+     * @param output    The output file.
+     * @param first     the first map.
+     * @param second    the second map.
+     * @param firstId   identifier for the first map.
+     * @param secondId  identifier for the second map.
      * @param maxLength maximum length of the recommendation.
      */
     public static void printFile(String output, Map<String, Double> first, Map<String, Double> second, String firstId, String secondId, int maxLength)
     {
         List<Tuple2<String, Double>> list = new ArrayList<>();
         int numVariants = 0;
-        for(String variant : first.keySet())
+        for (String variant : first.keySet())
         {
             double val = first.get(variant) - second.get(variant);
             list.add(new Tuple2<>(variant, val));
@@ -81,19 +114,47 @@ public class AuxiliarMethods
             return val;
         });
 
-        try(BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output))))
+        try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output))))
         {
-            bw.write("Variant\t%\tnDCG@"+maxLength+"("+firstId+")\tnDCG@"+maxLength+"("+secondId+")\tDifference");
+            bw.write("Variant\t%\tnDCG@" + maxLength + "(" + firstId + ")\tnDCG@" + maxLength + "(" + secondId + ")\tDifference");
             int i = 0;
-            for(Tuple2<String, Double> tuple : list)
+            for (Tuple2<String, Double> tuple : list)
             {
                 ++i;
-                bw.write("\n" + tuple.v1 + "\t" + i/(numVariants+0.0) + "\t" + first.get(tuple.v1) + "\t" + second.get(tuple.v1) + "\t" + tuple.v2);
+                bw.write("\n" + tuple.v1 + "\t" + i / (numVariants + 0.0) + "\t" + first.get(tuple.v1) + "\t" + second.get(tuple.v1) + "\t" + tuple.v2);
             }
         }
-        catch(IOException ioe)
+        catch (IOException ioe)
         {
             System.err.println("ERROR: Something failed while writing the output file");
+        }
+    }
+
+    private static class EmptyWriter<U, I> implements RecommendationFormat.Writer<U, I>, RecommendationFormat.Reader<U, I>
+    {
+        private final List<Recommendation<U, I>> recs;
+
+        public EmptyWriter()
+        {
+            this.recs = new ArrayList<>();
+        }
+
+        @Override
+        public void write(Recommendation<U, I> recommendation)
+        {
+            this.recs.add(recommendation);
+        }
+
+        @Override
+        public void close()
+        {
+
+        }
+
+        @Override
+        public Stream<Recommendation<U, I>> readAll()
+        {
+            return recs.stream();
         }
     }
 }

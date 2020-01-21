@@ -1,7 +1,8 @@
 /*
- *  Copyright (C) 2016 Information Retrieval Group at Universidad Aut�noma
- *  de Madrid, http://ir.ii.uam.es
- * 
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
+ *
  *  This Source Code Form is subject to the terms of the Mozilla Public
  *  License, v. 2.0. If a copy of the MPL was not distributed with this
  *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -15,40 +16,42 @@ import java.util.stream.Stream;
 
 /**
  * Class that represents both user and item indexes for a graph.
- * @author Javier Sanz-Cruzado Puig
+ *
  * @param <U> Type of the users.
+ *
+ * @author Javier Sanz-Cruzado Puig
  */
 public interface GraphIndex<U> extends FastItemIndex<U>, FastUserIndex<U>
 {
     @Override
-    public default int item2iidx(U i) 
+    default int item2iidx(U i)
     {
         return this.user2uidx(i);
     }
 
     @Override
-    public default U iidx2item(int i) 
+    default U iidx2item(int i)
     {
         return this.uidx2user(i);
     }
 
     @Override
-    public default boolean containsItem(U i) 
+    default boolean containsItem(U i)
     {
         return this.containsUser(i);
     }
 
     @Override
-    public default int numItems() 
+    default int numItems()
     {
         return this.numUsers();
     }
 
     @Override
-    public default Stream<U> getAllItems() 
+    default Stream<U> getAllItems()
     {
         return this.getAllUsers();
     }
-    
-   
+
+
 }

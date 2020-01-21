@@ -1,7 +1,8 @@
 /*
- *  Copyright (C) 2016 Information Retrieval Group at Universidad Aut�noma
- *  de Madrid, http://ir.ii.uam.es
- * 
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
+ *
  *  This Source Code Form is subject to the terms of the Mozilla Public
  *  License, v. 2.0. If a copy of the MPL was not distributed with this
  *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -24,20 +25,18 @@ import static es.uam.eps.ir.contactrecaxioms.recommender.grid.AlgorithmIdentifie
 
 /**
  * Grid search generator for Random algorithm.
- * @author Javier Sanz-Cruzado Puig
+ *
  * @param <U> Type of the users.
+ *
+ * @author Javier Sanz-Cruzado Puig
  */
 public class RandomGridSearch<U> implements AlgorithmGridSearch<U>
-{   
+{
     @Override
     public Map<String, RecommendationAlgorithmFunction<U>> grid(Grid grid)
     {
         Map<String, RecommendationAlgorithmFunction<U>> recs = new HashMap<>();
-        RecommendationAlgorithmFunction<U> bifunction = (graph, prefdata) -> 
-        {
-            return new Random<>(graph);
-        };
-        
+        RecommendationAlgorithmFunction<U> bifunction = (graph, prefdata) -> new Random<>(graph);
         recs.put(RANDOM, bifunction);
         return recs;
     }
@@ -45,14 +44,9 @@ public class RandomGridSearch<U> implements AlgorithmGridSearch<U>
     @Override
     public Map<String, Supplier<Recommender<U, U>>> grid(Grid grid, FastGraph<U> graph, FastPreferenceData<U, U> prefData)
     {
-        Map<String, Supplier<Recommender<U,U>>> recs = new HashMap<>();
-
-        recs.put(RANDOM, () -> 
-        {
-           return new Random<>(graph);
-        });
-        
+        Map<String, Supplier<Recommender<U, U>>> recs = new HashMap<>();
+        recs.put(RANDOM, () -> new Random<>(graph));
         return recs;
     }
-    
+
 }

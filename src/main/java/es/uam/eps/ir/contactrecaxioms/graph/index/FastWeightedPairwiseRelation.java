@@ -1,17 +1,18 @@
 /*
- * Copyright (C) 2019 Information Retrieval Group at Universidad Autónoma
- * de Madrid, http://ir.ii.uam.es.
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, you can obtain one at http://mozilla.org/MPL/2.0.
- *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package es.uam.eps.ir.contactrecaxioms.graph.index;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -50,18 +51,18 @@ public class FastWeightedPairwiseRelation<W> extends FastWeightedRelation<W>
         for (int i = 0; i < weightsList.size(); ++i)
         {
             List<IdxValue<W>> list = weightsList.get(i);
-            for (int j = 0; j < list.size(); ++j)
+            for (IdxValue<W> wIdxValue : list)
             {
-                this.firstIdxList.get(list.get(j).getIdx()).add(new IdxValue<>(i, list.get(j).getValue()));
+                this.firstIdxList.get(wIdxValue.getIdx()).add(new IdxValue<>(i, wIdxValue.getValue()));
             }
         }
 
         // Sorts the lists.
         firstIdxList.parallelStream()
-                .filter(l -> l != null)
+                .filter(Objects::nonNull)
                 .forEach(l -> l.sort(Comparator.naturalOrder()));
         secondIdxList.parallelStream()
-                .filter(l -> l != null)
+                .filter(Objects::nonNull)
                 .forEach(l -> l.sort(Comparator.naturalOrder()));
     }
 

@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2019 Information Retrieval Group at Universidad Autónoma
- * de Madrid, http://ir.ii.uam.es.
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, you can obtain one at http://mozilla.org/MPL/2.0.
- *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package es.uam.eps.ir.contactrecaxioms.graph.io;
 
@@ -122,11 +122,8 @@ public class TextGraphReader<V> implements GraphReader<V>
     {
         try
         {
-            GraphGenerator<V> gg = new EmptyGraphGenerator<>();
-
-            EmptyGraphGenerator<V> empty = (EmptyGraphGenerator<V>) gg;
-            empty.configure(directed, weighted);
-
+            EmptyGraphGenerator<V> gg = new EmptyGraphGenerator<>();
+            gg.configure(directed, weighted);
             Graph<V> graph = gg.generate();
 
             try (BufferedReader br = new BufferedReader(new InputStreamReader(stream)))
@@ -169,7 +166,7 @@ public class TextGraphReader<V> implements GraphReader<V>
             return graph;
         }
 
-        catch (GeneratorNotConfiguredException | GeneratorBadConfiguredException ex)
+        catch (GeneratorNotConfiguredException ex)
         {
             ex.printStackTrace();
             return null;
@@ -196,10 +193,8 @@ public class TextGraphReader<V> implements GraphReader<V>
     {
         try
         {
-            GraphGenerator<V> gg = new EmptyGraphGenerator<>();
-
-            EmptyGraphGenerator<V> empty = (EmptyGraphGenerator<V>) gg;
-            empty.configure(directed, weighted);
+            EmptyGraphGenerator<V> gg = new EmptyGraphGenerator<>();
+            gg.configure(directed, weighted);
 
             Graph<V> graph = gg.generate();
 
@@ -245,7 +240,7 @@ public class TextGraphReader<V> implements GraphReader<V>
             return graph;
         }
 
-        catch (GeneratorNotConfiguredException | GeneratorBadConfiguredException ex)
+        catch (GeneratorNotConfiguredException ex)
         {
             ex.printStackTrace();
             return null;

@@ -1,6 +1,7 @@
 /*
- *  Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
- *  de Madrid, http://ir.ii.uam.es
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
  *
  *  This Source Code Form is subject to the terms of the Mozilla Public
  *  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -20,41 +21,43 @@ import java.util.Optional;
  *
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
  * @author Pablo Castells (pablo.castells@uam.es)
- *
  * @see org.terrier.matching.models.DLH
  */
 public class DLH<U> extends TerrierRecommender<U>
 {
     /**
      * Constructor.
+     *
      * @param graph the training graph.
-     * @param uSel orientation selection for the target user.
-     * @param vSel orientation selection for the candidate user.
+     * @param uSel  orientation selection for the target user.
+     * @param vSel  orientation selection for the candidate user.
      */
-    public DLH(FastGraph<U> graph, EdgeOrientation uSel, EdgeOrientation vSel) {
+    public DLH(FastGraph<U> graph, EdgeOrientation uSel, EdgeOrientation vSel)
+    {
         super(graph, uSel, vSel);
     }
-    
+
     /**
      * Constructor.
-     * @param graph the training graph.
-     * @param uSel orientation selection for the target user.
-     * @param vSel orientation selection for the candidate user.
+     *
+     * @param graph     the training graph.
+     * @param uSel      orientation selection for the target user.
+     * @param vSel      orientation selection for the candidate user.
      * @param structure Terrier basic structures for the algorithm.
      */
     public DLH(FastGraph<U> graph, EdgeOrientation uSel, EdgeOrientation vSel, TerrierStructure structure)
     {
-        super(graph,uSel,vSel,structure);
+        super(graph, uSel, vSel, structure);
     }
 
     @Override
-    protected String getModel() 
+    protected String getModel()
     {
         return new org.terrier.matching.models.DLH().getInfo();
     }
 
     @Override
-    protected Optional<Double> getCValue() 
+    protected Optional<Double> getCValue()
     {
         return Optional.empty();
     }

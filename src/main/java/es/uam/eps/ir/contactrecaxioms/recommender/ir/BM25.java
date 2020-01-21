@@ -1,7 +1,8 @@
 /*
- *  Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
- *  de Madrid, http://ir.ii.uam.es
- * 
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
+ *
  *  This Source Code Form is subject to the terms of the Mozilla Public
  *  License, v. 2.0. If a copy of the MPL was not distributed with this
  *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -14,16 +15,18 @@ import es.uam.eps.ir.contactrecaxioms.recommender.UserFastRankingRecommender;
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 
+import java.util.OptionalDouble;
+
 /**
  * Adaptation of the BM-25 Information Retrieval Algorithm for user recommendation. Uses a term-based implementation.
- * 
- * Sparck Jones, K., Walker, S., Roberton S.E. A Probabilistic Model of Information Retrieval: Development and Comparative Experiments. 
+ * <p>
+ * Sparck Jones, K., Walker, S., Roberton S.E. A Probabilistic Model of Information Retrieval: Development and Comparative Experiments.
  * Information Processing and Management 36. February 2000, pp. 779-808 (part 1), pp. 809-840 (part 2).
- * 
- * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
- * @author Pablo Castells (pablo.castells@uam.es)
  *
  * @param <U> type of the users
+ *
+ * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Pablo Castells (pablo.castells@uam.es)
  */
 public class BM25<U> extends UserFastRankingRecommender<U>
 {
@@ -39,10 +42,10 @@ public class BM25<U> extends UserFastRankingRecommender<U>
      * Neighborhood selection for the target users.
      */
     private final EdgeOrientation uSel;
-        /**
+    /**
      * Neighborhood selection for the candidate users.
      */
-    private final EdgeOrientation vSel;    
+    private final EdgeOrientation vSel;
     /**
      * Neighbour selection for the document length
      */
@@ -63,22 +66,23 @@ public class BM25<U> extends UserFastRankingRecommender<U>
      * Neighborhood sizes for each user.
      */
     private final Int2DoubleOpenHashMap size;
-    
+
     private final Int2DoubleOpenHashMap wLengths;
 
     /**
      * Constructor.
+     *
      * @param graph Graph
-     * @param uSel Selection of the neighbours of the target user
-     * @param vSel Selection of the neighbours of the candidate user
+     * @param uSel  Selection of the neighbours of the target user
+     * @param vSel  Selection of the neighbours of the candidate user
      * @param dlSel Selection of the neighbours for the document length
-     * @param b Tunes the effect of the neighborhood size. Between 0 and 1.
-     * @param k parameter of the algorithm.
+     * @param b     Tunes the effect of the neighborhood size. Between 0 and 1.
+     * @param k     parameter of the algorithm.
      */
     public BM25(FastGraph<U> graph, EdgeOrientation uSel, EdgeOrientation vSel, EdgeOrientation dlSel, double b, double k)
     {
         super(graph);
-        
+
         this.dlSel = dlSel;
         this.b = b;
         this.k = k;
@@ -86,64 +90,66 @@ public class BM25<U> extends UserFastRankingRecommender<U>
         this.size = new Int2DoubleOpenHashMap();
         this.wLengths = new Int2DoubleOpenHashMap();
         this.numUsers = graph.getVertexCount();
-        
+
         this.uSel = uSel;
         this.vSel = vSel.invertSelection();
-        this.avgSize = this.getAllUidx().mapToDouble(vidx -> 
+        OptionalDouble opt = this.getAllUidx().mapToDouble(vidx ->
         {
             // Compute RSJ
             double rsjV = graph.getNeighborhood(vidx, this.vSel).count();
             this.wLengths.put(vidx, rsjV);
-            rsjV = Math.log((numUsers - rsjV + 0.5)/(rsjV + 0.5));
+            rsjV = Math.log((numUsers - rsjV + 0.5) / (rsjV + 0.5));
             this.rsj.put(vidx, rsjV);
-            
-            
+
+
             // Compute size
             double val = graph.getNeighborhoodWeights(vidx, dlSel).mapToDouble(widx -> widx.v2).sum();
 
             this.size.put(vidx, val);
             return val;
-        }).average().getAsDouble();
+        }).average();
+
+        this.avgSize = opt.isPresent() ? opt.getAsDouble() : 0.0;
     }
 
     @Override
-    public Int2DoubleMap getScoresMap(int uidx) 
+    public Int2DoubleMap getScoresMap(int uidx)
     {
         Int2DoubleOpenHashMap scoresMap = new Int2DoubleOpenHashMap();
         scoresMap.defaultReturnValue(0.0);
 
-        
-        if(Double.isFinite(this.k))
+
+        if (Double.isFinite(this.k))
         {
-            graph.getNeighborhood(uidx, uSel).forEach(widx -> 
+            graph.getNeighborhood(uidx, uSel).forEach(widx ->
             {
                 double rsjW = this.rsj.get((int) widx);
-                graph.getNeighborhoodWeights(widx, vSel).forEach(vidx -> 
+                graph.getNeighborhoodWeights(widx, vSel).forEach(vidx ->
                 {
                     double weight = vidx.v2;
                     double s = this.size.get(vidx.v1);
-                    
-                    double num = (this.k + 1.0)*weight*rsjW;
-                    double den = this.k*(1-b + (b*s/avgSize)) + weight;
-                    
-                    scoresMap.addTo(vidx.v1, num/den);
+
+                    double num = (this.k + 1.0) * weight * rsjW;
+                    double den = this.k * (1 - b + (b * s / avgSize)) + weight;
+
+                    scoresMap.addTo(vidx.v1, num / den);
                 });
             });
         }
         else
         {
-            graph.getNeighborhood(uidx, uSel).forEach(widx -> 
+            graph.getNeighborhood(uidx, uSel).forEach(widx ->
             {
                 double rsjW = this.rsj.get((int) widx);
-                graph.getNeighborhoodWeights(widx, vSel).forEach(vidx -> 
+                graph.getNeighborhoodWeights(widx, vSel).forEach(vidx ->
                 {
                     double weight = vidx.v2;
                     double s = this.size.get(vidx.v1);
-                    
-                    double num = weight*rsjW;
-                    double den = (1-b + (b*s/avgSize));
-                    
-                    scoresMap.addTo(vidx.v1, num/den);
+
+                    double num = weight * rsjW;
+                    double den = (1 - b + (b * s / avgSize));
+
+                    scoresMap.addTo(vidx.v1, num / den);
                 });
             });
         }

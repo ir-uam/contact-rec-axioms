@@ -1,7 +1,8 @@
-/* 
- *  Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
- *  de Madrid, http://ir.ii.uam.es
- * 
+/*
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
+ *
  *  This Source Code Form is subject to the terms of the Mozilla Public
  *  License, v. 2.0. If a copy of the MPL was not distributed with this
  *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -16,11 +17,11 @@ import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 
 /**
  * Recommender that uses the Adamic-Adar coefficient of the neighbours.
- * 
- * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
- * @author Pablo Castells (pablo.castells@uam.es)
  *
  * @param <U> type of the users.
+ *
+ * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Pablo Castells (pablo.castells@uam.es)
  */
 public class AdamicAdar<U> extends UserFastRankingRecommender<U>
 {
@@ -43,38 +44,36 @@ public class AdamicAdar<U> extends UserFastRankingRecommender<U>
 
     /**
      * Constructor.
+     *
      * @param graph the graph.
-     * @param uSel the neighborhood selection for the target user.
-     * @param vSel the neighborhood selection for the candidate user.
-     * @param wSel the neighborhood selection for the users in the intersection
+     * @param uSel  the neighborhood selection for the target user.
+     * @param vSel  the neighborhood selection for the candidate user.
+     * @param wSel  the neighborhood selection for the users in the intersection
      */
     public AdamicAdar(FastGraph<U> graph, EdgeOrientation uSel, EdgeOrientation vSel, EdgeOrientation wSel)
     {
         super(graph);
-        
+
         wSizes = new Int2DoubleOpenHashMap();
         this.uSel = uSel;
         this.vSel = vSel.invertSelection();
         this.wSel = wSel;
-        
-        this.getAllUidx().forEach(widx -> wSizes.put(widx,graph.getNeighborhood(widx, wSel).count() + 0.0));
+
+        this.getAllUidx().forEach(widx -> wSizes.put(widx, graph.getNeighborhood(widx, wSel).count() + 0.0));
     }
 
     @Override
-    public Int2DoubleMap getScoresMap(int uidx) 
+    public Int2DoubleMap getScoresMap(int uidx)
     {
         Int2DoubleOpenHashMap scoresMap = new Int2DoubleOpenHashMap();
         scoresMap.defaultReturnValue(0.0);
 
-        graph.getNeighborhood(uidx, uSel).forEach(widx -> 
+        graph.getNeighborhood(uidx, uSel).forEach(widx ->
         {
-            double weight = 1.0/Math.log(wSizes.get((int) widx) + 2.0);
-            graph.getNeighborhood(widx, vSel).forEach(vidx -> 
-            {
-                scoresMap.addTo(vidx, weight);
-            });
+            double weight = 1.0 / Math.log(wSizes.get((int) widx) + 2.0);
+            graph.getNeighborhood(widx, vSel).forEach(vidx -> scoresMap.addTo(vidx, weight));
         });
-       
+
         return scoresMap;
     }
 }

@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
- * de Madrid, http://ir.ii.uam.es
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
  *
  *  This Source Code Form is subject to the terms of the Mozilla Public
  *  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -43,6 +44,7 @@ public class EWC3
 {
     /**
      * Main for executing the experiments for the EWC3 axiom.
+     *
      * @param args Execution arguments:
      *             <ol>
      *              <li><b>Train:</b> Route of a file containing the training graph.</li>
@@ -53,7 +55,7 @@ public class EWC3
      */
     public static void main(String[] args)
     {
-        if(args.length < 3)
+        if (args.length < 3)
         {
             System.err.println("ERROR: Invalid arguments");
             System.err.println("Arguments:");
@@ -77,7 +79,7 @@ public class EWC3
 
         // Obtain the possible EdgeOrientation values.
         EdgeOrientation[] eos;
-        if(directed)
+        if (directed)
         {
             eos = new EdgeOrientation[]{IN, OUT, UND};
         }
@@ -90,9 +92,9 @@ public class EWC3
         Set<Long> users = train.getAllNodes().filter(test::hasAdjacentEdges).collect(Collectors.toSet());
 
         // For each pair of orientations, get the reachable users from the target ones:
-        try(BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file))))
+        try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file))))
         {
-            for(EdgeOrientation eo : eos)
+            for (EdgeOrientation eo : eos)
             {
                 for (EdgeOrientation eo2 : eos)
                 {
@@ -100,9 +102,11 @@ public class EWC3
                     Stats posStats = new Stats();
 
                     // For each target user
-                    for (Long u : users) {
+                    for (Long u : users)
+                    {
                         // If the users have at least one neighbor
-                        if (train.getNeighbourhoodSize(u, eo) > 1) {
+                        if (train.getNeighbourhoodSize(u, eo) > 1)
+                        {
                             Long2DoubleMap map = new Long2DoubleOpenHashMap();
                             // First, we obtain the MCN values between u and the users at distance 2.
                             train.getNeighbourhood(u, eo).forEach(v ->
@@ -118,22 +122,28 @@ public class EWC3
                             boolean include = false;
 
                             // Fill the list.
-                            for (Entry<Long, Double> entry : map.long2DoubleEntrySet()) {
+                            for (Entry<Long, Double> entry : map.long2DoubleEntrySet())
+                            {
                                 long v = entry.getKey();
                                 double val = entry.getValue();
 
-                                if (!train.containsEdge(u, v) && !train.containsEdge(v, u)) {
-                                    if (test.containsEdge(u, v)) {
+                                if (!train.containsEdge(u, v) && !train.containsEdge(v, u))
+                                {
+                                    if (test.containsEdge(u, v))
+                                    {
                                         values.add(new Tuple2oo<>(val, true));
                                         include = true;
-                                    } else {
+                                    }
+                                    else
+                                    {
                                         values.add(new Tuple2oo<>(val, false));
                                     }
                                 }
                             }
 
                             // If the user has, at least, one positive element...
-                            if (include) {
+                            if (include)
+                            {
                                 AUC auc = new AUC();
                                 double aucValue = auc.compute(values);
                                 posStats.accept(aucValue);
@@ -145,7 +155,7 @@ public class EWC3
                 }
             }
         }
-        catch(IOException ioe)
+        catch (IOException ioe)
         {
             System.err.println("ERROR: Something failed while writing the file");
         }

@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2019 Information Retrieval Group at Universidad Autónoma
- * de Madrid, http://ir.ii.uam.es.
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, you can obtain one at http://mozilla.org/MPL/2.0.
- *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package es.uam.eps.ir.contactrecaxioms.graph.fast;
 
@@ -95,7 +95,7 @@ public abstract class FastGraph<V> implements Graph<V>, Serializable
     {
         if (this.containsVertex(node))
         {
-            return this.edges.getIncidentNodes(this.vertices.object2idx(node)).map(n -> this.vertices.idx2object(n));
+            return this.edges.getIncidentNodes(this.vertices.object2idx(node)).map(this.vertices::idx2object);
         }
         return Stream.empty();
     }
@@ -105,7 +105,7 @@ public abstract class FastGraph<V> implements Graph<V>, Serializable
     {
         if (this.containsVertex(node))
         {
-            return this.edges.getAdjacentNodes(this.vertices.object2idx(node)).map(n -> this.vertices.idx2object(n));
+            return this.edges.getAdjacentNodes(this.vertices.object2idx(node)).map(this.vertices::idx2object);
         }
         return Stream.empty();
     }
@@ -115,7 +115,7 @@ public abstract class FastGraph<V> implements Graph<V>, Serializable
     {
         if (this.containsVertex(node))
         {
-            return this.edges.getNeighbourNodes(this.vertices.object2idx(node)).map(n -> this.vertices.idx2object(n));
+            return this.edges.getNeighbourNodes(this.vertices.object2idx(node)).map(this.vertices::idx2object);
         }
         return Stream.empty();
     }
@@ -125,7 +125,7 @@ public abstract class FastGraph<V> implements Graph<V>, Serializable
     {
         if (this.containsVertex(node))
         {
-            return this.edges.getMutualNodes(this.vertices.object2idx(node)).map(n -> this.vertices.idx2object(n));
+            return this.edges.getMutualNodes(this.vertices.object2idx(node)).map(this.vertices::idx2object);
         }
         return Stream.empty();
     }
@@ -476,7 +476,7 @@ public abstract class FastGraph<V> implements Graph<V>, Serializable
     @Override
     public Stream<V> getIsolatedNodes()
     {
-        return this.edges.getIsolatedNodes().mapToObj(i -> this.idx2object(i));
+        return this.edges.getIsolatedNodes().mapToObj(this::idx2object);
     }
 
     @Override
@@ -485,13 +485,13 @@ public abstract class FastGraph<V> implements Graph<V>, Serializable
         switch (direction)
         {
             case IN:
-                return this.edges.getNodesWithIncidentEdges().mapToObj(i -> this.idx2object(i));
+                return this.edges.getNodesWithIncidentEdges().mapToObj(this::idx2object);
             case OUT:
-                return this.edges.getNodesWithAdjacentEdges().mapToObj(i -> this.idx2object(i));
+                return this.edges.getNodesWithAdjacentEdges().mapToObj(this::idx2object);
             case UND:
-                return this.edges.getNodesWithEdges().mapToObj(i -> this.idx2object(i));
+                return this.edges.getNodesWithEdges().mapToObj(this::idx2object);
             case MUTUAL:
-                return this.edges.getNodesWithMutualEdges().mapToObj(i -> this.idx2object(i));
+                return this.edges.getNodesWithMutualEdges().mapToObj(this::idx2object);
             default:
                 break;
         }

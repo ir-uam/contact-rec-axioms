@@ -1,17 +1,18 @@
 /*
- * Copyright (C) 2019 Information Retrieval Group at Universidad Autónoma
- * de Madrid, http://ir.ii.uam.es.
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, you can obtain one at http://mozilla.org/MPL/2.0.
- *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package es.uam.eps.ir.contactrecaxioms.graph.index;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 /**
@@ -50,18 +51,18 @@ public class FastWeightedAutoRelation<W> extends FastWeightedRelation<W> impleme
         for (int i = 0; i < weightsList.size(); ++i)
         {
             List<IdxValue<W>> list = weightsList.get(i);
-            for (int j = 0; j < list.size(); ++j)
+            for (IdxValue<W> wIdxValue : list)
             {
-                this.firstIdxList.get(list.get(j).getIdx()).add(new IdxValue<>(i, list.get(j).getValue()));
+                this.firstIdxList.get(wIdxValue.getIdx()).add(new IdxValue<>(i, wIdxValue.getValue()));
             }
         }
 
         // Sorts the lists.
         firstIdxList.parallelStream()
-                .filter(l -> l != null)
+                .filter(Objects::nonNull)
                 .forEach(l -> l.sort(Comparator.naturalOrder()));
         secondIdxList.parallelStream()
-                .filter(l -> l != null)
+                .filter(Objects::nonNull)
                 .forEach(l -> l.sort(Comparator.naturalOrder()));
     }
 
@@ -89,16 +90,15 @@ public class FastWeightedAutoRelation<W> extends FastWeightedRelation<W> impleme
         {
             List<IdxValue<W>> auxFList = new ArrayList<>();
             List<IdxValue<W>> fList = this.firstIdxList.get(i);
-            int auxCount = IntStream.range(0, fList.size()).map(j ->
-            {
+            int auxCount = fList.stream().mapToInt(wIdxValue -> {
                 int c = 0;
-                if (fList.get(j).getIdx() < idx)
+                if (wIdxValue.getIdx() < idx)
                 {
-                    auxFList.add(fList.get(j));
+                    auxFList.add(wIdxValue);
                 }
-                else if (fList.get(j).getIdx() > idx)
+                else if (wIdxValue.getIdx() > idx)
                 {
-                    auxFList.add(new IdxValue<>(fList.get(j).getIdx() - 1, fList.get(j).getValue()));
+                    auxFList.add(new IdxValue<>(wIdxValue.getIdx() - 1, wIdxValue.getValue()));
                 }
                 else
                 {
@@ -112,16 +112,15 @@ public class FastWeightedAutoRelation<W> extends FastWeightedRelation<W> impleme
             List<IdxValue<W>> auxSList = new ArrayList<>();
             List<IdxValue<W>> sList;
             sList = this.secondIdxList.get(i);
-            auxCount += IntStream.range(0, sList.size()).map(j ->
-            {
+            auxCount += sList.stream().mapToInt(wIdxValue -> {
                 int c = 0;
-                if (sList.get(j).getIdx() < idx)
+                if (wIdxValue.getIdx() < idx)
                 {
-                    auxSList.add(sList.get(j));
+                    auxSList.add(wIdxValue);
                 }
-                else if (sList.get(j).getIdx() > idx)
+                else if (wIdxValue.getIdx() > idx)
                 {
-                    auxSList.add(new IdxValue<>(sList.get(j).getIdx() - 1, sList.get(j).getValue()));
+                    auxSList.add(new IdxValue<>(wIdxValue.getIdx() - 1, wIdxValue.getValue()));
                 }
                 else
                 {
@@ -141,27 +140,18 @@ public class FastWeightedAutoRelation<W> extends FastWeightedRelation<W> impleme
     @Override
     public IntStream getIsolated()
     {
-        return IntStream.range(0, this.numFirst()).filter(i ->
-        {
-            return this.firstIdxList.get(i).isEmpty() && this.secondIdxList.get(i).isEmpty();
-        });
+        return IntStream.range(0, this.numFirst()).filter(i -> this.firstIdxList.get(i).isEmpty() && this.secondIdxList.get(i).isEmpty());
     }
 
     @Override
     public IntStream firstsWithSeconds()
     {
-        return IntStream.range(0, this.numFirst()).filter(i ->
-        {
-            return !this.secondIdxList.get(i).isEmpty();
-        });
+        return IntStream.range(0, this.numFirst()).filter(i -> !this.secondIdxList.get(i).isEmpty());
     }
 
     @Override
     public IntStream secondsWithFirsts()
     {
-        return IntStream.range(0, this.numFirst()).filter(i ->
-        {
-            return !this.firstIdxList.get(i).isEmpty();
-        });
+        return IntStream.range(0, this.numFirst()).filter(i -> !this.firstIdxList.get(i).isEmpty());
     }
 }

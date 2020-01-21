@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2019 Information Retrieval Group at Universidad Autónoma
- * de Madrid, http://ir.ii.uam.es.
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, you can obtain one at http://mozilla.org/MPL/2.0.
- *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package es.uam.eps.ir.contactrecaxioms.graph.edges.fast;
 
@@ -15,6 +15,7 @@ import es.uam.eps.ir.contactrecaxioms.graph.edges.EdgeWeight;
 import es.uam.eps.ir.contactrecaxioms.graph.edges.UnweightedEdges;
 import es.uam.eps.ir.contactrecaxioms.graph.index.FastUnweightedAutoRelation;
 import es.uam.eps.ir.contactrecaxioms.graph.index.FastWeightedAutoRelation;
+import es.uam.eps.ir.contactrecaxioms.graph.index.IdxValue;
 import es.uam.eps.ir.contactrecaxioms.utils.OrderedListCombiner;
 import es.uam.eps.ir.contactrecaxioms.utils.Tuple2oo;
 import es.uam.eps.ir.ranksys.fast.preference.IdxPref;
@@ -42,13 +43,13 @@ public class FastDirectedUnweightedEdges extends FastEdges implements DirectedEd
     @Override
     public Stream<Integer> getIncidentNodes(int node)
     {
-        return this.weights.getIdsFirst(node).map(weight -> weight.getIdx());
+        return this.weights.getIdsFirst(node).map(IdxValue::getIdx);
     }
 
     @Override
     public Stream<Integer> getAdjacentNodes(int node)
     {
-        return this.weights.getIdsSecond(node).map(weight -> weight.getIdx());
+        return this.weights.getIdsSecond(node).map(IdxValue::getIdx);
     }
 
     @Override
@@ -68,9 +69,7 @@ public class FastDirectedUnweightedEdges extends FastEdges implements DirectedEd
     {
         List<IdxPref> neighbors = new ArrayList<>();
         Comparator<Tuple2oo<Integer, Iterator<Integer>>> comparator = (Tuple2oo<Integer, Iterator<Integer>> x, Tuple2oo<Integer, Iterator<Integer>> y) ->
-        {
-            return (int) (x.v1() - y.v1());
-        };
+                (int) (x.v1() - y.v1());
 
         PriorityQueue<Tuple2oo<Integer, Iterator<Integer>>> queue = new PriorityQueue<>(2, comparator);
 

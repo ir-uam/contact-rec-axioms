@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
- * de Madrid, http://ir.ii.uam.es.
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
  *
  *  This Source Code Form is subject to the terms of the Mozilla Public
  *  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -28,8 +29,9 @@ import es.uam.eps.ir.ranksys.rec.runner.fast.FastFilterRecommenderRunner;
 import es.uam.eps.ir.ranksys.rec.runner.fast.FastFilters;
 import org.ranksys.formats.parsing.Parsers;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 
@@ -46,19 +48,20 @@ public class EWC2
     /**
      * Program that reproduces the experiments for the EWC1 axiom.
      * Generates a file comparing weigthed and unweighted algorithm variants.
+     *
      * @param args Execution arguments:
-     *        <ol>
-     *          <li><b>Train:</b> Route to the file containing the training graph.</li>
-     *          <li><b>Test:</b> Route to the file containing the test links.</li>
-     *          <li><b>Algorithms:</b> Route to an XML file containing the recommender configurations. Must include configurations for BM25.</li>
-     *          <li><b>Output directory:</b> Directory in which to store the recommendations and the output file.</li>
-     *          <li><b>Directed:</b> True if the network is directed, false otherwise.</li>
-     *          <li><b>Max. Length:</b> Maximum number of recommendations per user.</li>
-     *        </ol>
+     *             <ol>
+     *               <li><b>Train:</b> Route to the file containing the training graph.</li>
+     *               <li><b>Test:</b> Route to the file containing the test links.</li>
+     *               <li><b>Algorithms:</b> Route to an XML file containing the recommender configurations. Must include configurations for BM25.</li>
+     *               <li><b>Output directory:</b> Directory in which to store the recommendations and the output file.</li>
+     *               <li><b>Directed:</b> True if the network is directed, false otherwise.</li>
+     *               <li><b>Max. Length:</b> Maximum number of recommendations per user.</li>
+     *             </ol>
      */
-    public static void main(String args[])
+    public static void main(String[] args)
     {
-        if(args.length < 6)
+        if (args.length < 6)
         {
             System.err.println("Invalid arguments.");
             System.err.println("Usage:");
@@ -84,24 +87,24 @@ public class EWC2
         // Read the training graph.
         TextGraphReader<Long> greader = new TextGraphReader<>(directed, weighted, false, "\t", Parsers.lp);
         FastGraph<Long> graph = (FastGraph<Long>) greader.read(trainDataPath, weighted, false);
-        if(graph == null)
+        if (graph == null)
         {
             System.err.println("ERROR: Could not read the training graph");
             return;
         }
         // Read the test graph.
 
-        Graph<Long> auxgraph = greader.read(testDataPath, false, false);
+        TextGraphReader<Long> testGraphReader = new TextGraphReader<>(directed, false, false, "\t", Parsers.lp);
+        Graph<Long> auxgraph = testGraphReader.read(testDataPath, false, false);
         FastGraph<Long> testGraph = (FastGraph<Long>) Adapters.onlyTrainUsers(auxgraph, graph);
-        if(testGraph == null)
+        if (testGraph == null)
         {
             System.err.println("ERROR: Could not remove users from the test graph");
             return;
         }
 
         long timeb = System.currentTimeMillis();
-        System.out.println("Data read (" +(timeb-timea) + " ms.)");
-        timea = System.currentTimeMillis();
+        System.out.println("Data read (" + (timeb - timea) + " ms.)");
 
         // Read the training and test data
         FastPreferenceData<Long, Long> trainData;
@@ -116,7 +119,7 @@ public class EWC2
         gridreader.readDocument();
         // and obtain the parameters for BM25
         Grid grid = gridreader.getGrid(AlgorithmIdentifiers.BM25);
-        if(grid == null)
+        if (grid == null)
         {
             System.err.println("ERROR: Configuration for the BM25 algorithm is not available");
             return;
@@ -144,8 +147,9 @@ public class EWC2
             SystemMetric<Long, Long> nDCG = new AverageRecommendationMetric<>(new NDCG<>(maxLength, ndcgModel), true);
 
             // Configure the recommender runner.
-            Function<Long, IntPredicate> filter = FastFilters.and(FastFilters.notInTrain(trainData), FastFilters.notSelf(index), SocialFastFilters.notReciprocal(graph,index));
-            RecommenderRunner<Long,Long> runner = new FastFilterRecommenderRunner<>(index, index, testData.getUsersWithPreferences(), filter, maxLength);
+            @SuppressWarnings("unchecked")
+            Function<Long, IntPredicate> filter = FastFilters.and(FastFilters.notInTrain(trainData), FastFilters.notSelf(index), SocialFastFilters.notReciprocal(graph, index));
+            RecommenderRunner<Long, Long> runner = new FastFilterRecommenderRunner<>(index, index, testData.getUsersWithPreferences(), filter, maxLength);
 
             try
             {
@@ -160,14 +164,14 @@ public class EWC2
                 bm25Values.put(bm25name, bm25value);
                 ebm25Values.put(bm25name, ebm25value);
             }
-            catch(IOException ioe)
+            catch (IOException ioe)
             {
                 System.err.println("ERROR: Something failed while executing " + bm25name);
             }
         });
 
         // Print the output file.
-        AuxiliarMethods.printFile(outputPath+"ewc2.txt", bm25Values, ebm25Values, "BM25", "EBM25", maxLength);
+        AuxiliarMethods.printFile(outputPath + "ewc2.txt", bm25Values, ebm25Values, "BM25", "EBM25", maxLength);
     }
 
 

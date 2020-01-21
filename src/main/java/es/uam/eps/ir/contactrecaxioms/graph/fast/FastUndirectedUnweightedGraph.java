@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2019 Information Retrieval Group at Universidad Autónoma
- * de Madrid, http://ir.ii.uam.es.
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
  *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, you can obtain one at http://mozilla.org/MPL/2.0.
- *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 package es.uam.eps.ir.contactrecaxioms.graph.fast;
 
@@ -39,7 +39,7 @@ public class FastUndirectedUnweightedGraph<V> extends FastGraph<V> implements Un
     @Override
     public DoubleMatrix2D getAdjacencyMatrix(EdgeOrientation direction)
     {
-        DoubleMatrix2D matrix = new SparseDoubleMatrix2D(new Long(this.getVertexCount()).intValue(), new Long(this.getVertexCount()).intValue());
+        DoubleMatrix2D matrix = new SparseDoubleMatrix2D(Long.valueOf(this.getVertexCount()).intValue(), Long.valueOf(this.getVertexCount()).intValue());
 
         // Creation of the adjacency matrix.
         for (int row = 0; row < matrix.rows(); ++row)
@@ -62,7 +62,7 @@ public class FastUndirectedUnweightedGraph<V> extends FastGraph<V> implements Un
     @Override
     public Matrix getAdjacencyMatrixMTJ(EdgeOrientation direction)
     {
-        Matrix matrix = new LinkedSparseMatrix(new Long(this.getVertexCount()).intValue(), new Long(this.getVertexCount()).intValue());
+        Matrix matrix = new LinkedSparseMatrix(Long.valueOf(this.getVertexCount()).intValue(), Long.valueOf(this.getVertexCount()).intValue());
         this.vertices.getAllObjects().forEach(u ->
         {
             int uIdx = this.vertices.object2idx(u);

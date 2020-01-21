@@ -1,7 +1,8 @@
 /*
- *  Copyright (C) 2016 Information Retrieval Group at Universidad Aut�noma
- *  de Madrid, http://ir.ii.uam.es
- * 
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
+ *
  *  This Source Code Form is subject to the terms of the Mozilla Public
  *  License, v. 2.0. If a copy of the MPL was not distributed with this
  *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -16,9 +17,10 @@ import java.util.List;
 
 /**
  * Reads configurations.
+ *
  * @author Javier Sanz-Cruzado Puig
  */
-public abstract class ConfigurationsReader 
+public abstract class ConfigurationsReader
 {
     /**
      * Identifier for the configuration.
@@ -32,22 +34,24 @@ public abstract class ConfigurationsReader
      * Identifier for the individual parameters.
      */
     private final static String PARAM = "param";
-    
+
     /**
      * Reads the possible values for the parameters of an algorithm.
+     *
      * @param configurations XML nodes containing the configurations information
-     * @param paramReader a parameter reader.
+     * @param paramReader    a parameter reader.
+     *
      * @return the list of configurations.
      */
     protected Configurations readConfigurationGrid(NodeList configurations, ParametersReader paramReader)
     {
         List<Parameters> configs = new ArrayList<>();
 
-        for(int i = 0; i < configurations.getLength(); ++i)
+        for (int i = 0; i < configurations.getLength(); ++i)
         {
             Element element = (Element) configurations.item(i);
             NodeList parametersNodes = element.getElementsByTagName(PARAMS);
-            if(parametersNodes == null || parametersNodes.getLength() == 0)
+            if (parametersNodes == null || parametersNodes.getLength() == 0)
             {
                 configs.add(new Parameters());
             }
@@ -55,14 +59,13 @@ public abstract class ConfigurationsReader
             {
                 Element parametersNode = (Element) parametersNodes.item(0);
                 NodeList parameters = parametersNodes.item(0).getChildNodes();
-                
-                
-                
+
+
                 Parameters params = paramReader.readParameterGrid(parameters);
                 configs.add(params);
             }
         }
-        
+
         return new Configurations(configs);
     }
 }

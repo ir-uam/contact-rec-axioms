@@ -1,7 +1,8 @@
 /*
- * Copyright (C) 2020 Information Retrieval Group at Universidad Aut�noma
- * de Madrid, http://ir.ii.uam.es
- * 
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
+ *
  *  This Source Code Form is subject to the terms of the Mozilla Public
  *  License, v. 2.0. If a copy of the MPL was not distributed with this
  *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -23,7 +24,7 @@ import java.util.Map;
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
  * @author Pablo Castells (pablo.castells@uam.es)
  */
-public class TerrierStructure 
+public class TerrierStructure
 {
     /**
      * The possible set of indexes
@@ -32,36 +33,38 @@ public class TerrierStructure
     /**
      * The possible sets of queries
      */
-    private final Map<EdgeOrientation, Map<Integer,String>> queries;
-    
+    private final Map<EdgeOrientation, Map<Integer, String>> queries;
+
     /**
      * Constructor.
-     * @param graph the graph. 
+     *
+     * @param graph the graph.
      */
     public TerrierStructure(FastGraph<?> graph)
     {
         this.indexes = new HashMap<>();
         this.queries = new HashMap<>();
-        
-        for(EdgeOrientation eo : EdgeOrientation.values())
+
+        for (EdgeOrientation eo : EdgeOrientation.values())
         {
-            TerrierIndex index = new TerrierIndex(graph, eo,eo);
+            TerrierIndex index = new TerrierIndex(graph, eo, eo);
             this.indexes.put(eo, index.getMemoryIndex());
             this.queries.put(eo, index.getQueries());
         }
     }
-    
+
     /**
      * Obtains a pair index/queries given some orientations.
+     *
      * @param uSel the orientation for the queries.
      * @param vSel the orientation for the index.
+     *
      * @return a pair containing both values.
      */
-    public Tuple2oo<MemoryIndex, Map<Integer,String>> get(EdgeOrientation uSel, EdgeOrientation vSel)
+    public Tuple2oo<MemoryIndex, Map<Integer, String>> get(EdgeOrientation uSel, EdgeOrientation vSel)
     {
         return new Tuple2oo<>(indexes.get(vSel), queries.get(uSel));
     }
-    
-    
-    
+
+
 }

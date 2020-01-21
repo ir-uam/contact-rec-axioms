@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
- * de Madrid, http://ir.ii.uam.es.
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
  *
  *  This Source Code Form is subject to the terms of the Mozilla Public
  *  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -8,6 +9,7 @@
  */
 package es.uam.eps.ir.contactrecaxioms.main;
 
+import es.uam.eps.ir.contactrecaxioms.data.GraphSimpleFastPreferenceData;
 import es.uam.eps.ir.contactrecaxioms.graph.Adapters;
 import es.uam.eps.ir.contactrecaxioms.graph.Graph;
 import es.uam.eps.ir.contactrecaxioms.graph.fast.FastGraph;
@@ -17,7 +19,6 @@ import es.uam.eps.ir.contactrecaxioms.recommender.GraphIndex;
 import es.uam.eps.ir.contactrecaxioms.recommender.SocialFastFilters;
 import es.uam.eps.ir.contactrecaxioms.recommender.grid.AlgorithmGridReader;
 import es.uam.eps.ir.contactrecaxioms.recommender.grid.AlgorithmGridSelector;
-import es.uam.eps.ir.contactrecaxioms.data.GraphSimpleFastPreferenceData;
 import es.uam.eps.ir.ranksys.fast.preference.FastPreferenceData;
 import es.uam.eps.ir.ranksys.metrics.SystemMetric;
 import es.uam.eps.ir.ranksys.metrics.basic.AverageRecommendationMetric;
@@ -26,18 +27,18 @@ import es.uam.eps.ir.ranksys.rec.Recommender;
 import es.uam.eps.ir.ranksys.rec.runner.RecommenderRunner;
 import es.uam.eps.ir.ranksys.rec.runner.fast.FastFilterRecommenderRunner;
 import es.uam.eps.ir.ranksys.rec.runner.fast.FastFilters;
-
 import org.ranksys.formats.parsing.Parsers;
 import org.ranksys.formats.rec.RecommendationFormat;
 import org.ranksys.formats.rec.TRECRecommendationFormat;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
 
 import static org.ranksys.formats.parsing.Parsers.lp;
 
@@ -54,19 +55,21 @@ public class EWC1
     /**
      * Program that reproduces the experiments for the EWC1 axiom.
      * Generates a file comparing weigthed and unweighted algorithm variants.
+     *
      * @param args Execution arguments:
-     *        <ol>
-     *          <li><b>Train:</b> Route to the file containing the training graph.</li>
-     *          <li><b>Test:</b> Route to the file containing the test links.</li>
-     *          <li><b>Algorithms:</b> Route to an XML file containing the recommender configurations.</li>
-     *          <li><b>Output directory:</b> Directory in which to store the recommendations and the output file.</li>
-     *          <li><b>Directed:</b> True if the network is directed, false otherwise.</li>
-     *          <li><b>Max. Length:</b> Maximum number of recommendations per user.</li>
-     *        </ol>
+     *             <ol>
+     *               <li><b>Train:</b> Route to the file containing the training graph.</li>
+     *               <li><b>Test:</b> Route to the file containing the test links.</li>
+     *               <li><b>Algorithms:</b> Route to an XML file containing the recommender configurations.</li>
+     *               <li><b>Output directory:</b> Directory in which to store the recommendations and the output file.</li>
+     *               <li><b>Directed:</b> True if the network is directed, false otherwise.</li>
+     *               <li><b>Max. Length:</b> Maximum number of recommendations per user.</li>
+     *               <li><b>Print recommendations:</b> True if, additionally to the results, you want to print the recommendations. False otherwise</li>
+     *             </ol>
      */
-    public static void main(String args[])
+    public static void main(String[] args)
     {
-        if(args.length < 6)
+        if (args.length < 6)
         {
             System.err.println("Invalid arguments.");
             System.err.println("Usage:");
@@ -86,10 +89,11 @@ public class EWC1
         String outputPath = args[3];
         boolean directed = args[4].equalsIgnoreCase("true");
         int maxLength = Parsers.ip.parse(args[5]);
+        boolean printRecommenders = args[6].equalsIgnoreCase("true");
 
         // Initialize the maps to store the accuracy values.
-        Map<String, Double> weightedValues = new HashMap<>();
-        Map<String, Double> unweightedValues = new HashMap<>();
+        Map<String, Double> weightedValues = new ConcurrentHashMap<>();
+        Map<String, Double> unweightedValues = new ConcurrentHashMap<>();
 
         // Store the different values of weighted / unweighted
         List<Boolean> weightedVals = new ArrayList<>();
@@ -97,41 +101,51 @@ public class EWC1
         weightedVals.add(false);
 
         // First, we do create the directories.
-        File weightedDirectory = new File(outputPath + "weighted" + File.separator);
-        weightedDirectory.mkdirs();
-        File unweightedDirectory = new File(outputPath + "unweighted" + File.separator);
-        unweightedDirectory.mkdirs();
-
-        weightedVals.forEach(weighted ->
+        if (printRecommenders)
         {
+            File weightedDirectory = new File(outputPath + "weighted" + File.separator);
+            weightedDirectory.mkdirs();
+            File unweightedDirectory = new File(outputPath + "unweighted" + File.separator);
+            unweightedDirectory.mkdirs();
+        }
+
+        // Read the test graph
+        TextGraphReader<Long> testGraphReader = new TextGraphReader<>(directed, false, false, "\t", Parsers.lp);
+        Graph<Long> auxTestGraph = testGraphReader.read(testDataPath, false, false);
+
+        if (auxTestGraph == null)
+        {
+            System.err.println("ERROR: Could not read the test graph");
+            return;
+        }
+        // Execute the loop for weighted and unweighted.
+        for (boolean weighted : weightedVals)
+        {
+            System.out.println("-------- Started " + (weighted ? "weighted" : "unweighted") + " variants --------");
             long timea = System.currentTimeMillis();
 
             // Read the training graph.
             TextGraphReader<Long> greader = new TextGraphReader<>(directed, weighted, false, "\t", Parsers.lp);
-            FastGraph<Long> graph = (FastGraph<Long>) greader.read(trainDataPath, weighted, false);
-            if(graph == null)
+            FastGraph<Long> graph = (FastGraph<Long>) greader.read(trainDataPath);
+            if (graph == null)
             {
                 System.err.println("ERROR: Could not read the training graph");
                 return;
             }
 
             // Read the test graph.
-            Graph<Long> auxgraph = greader.read(testDataPath, false, false);
-            FastGraph<Long> testGraph = (FastGraph<Long>) Adapters.onlyTrainUsers(auxgraph, graph);
-            if(testGraph == null)
-            {
-                System.err.println("ERROR: Could not remove users from the test graph");
-                return;
-            }
+
 
             long timeb = System.currentTimeMillis();
-            System.out.println("Data read (" +(timeb-timea) + " ms.)");
+            System.out.println("Data read (" + (timeb - timea) + " ms.)");
             timea = System.currentTimeMillis();
 
             // Prepare the training and test data
             FastPreferenceData<Long, Long> trainData;
             trainData = GraphSimpleFastPreferenceData.load(graph);
 
+            // Clean the test graph.
+            FastGraph<Long> testGraph = (FastGraph<Long>) Adapters.onlyTrainUsers(auxTestGraph, graph);
             FastPreferenceData<Long, Long> testData;
             testData = GraphSimpleFastPreferenceData.load(testGraph);
             GraphIndex<Long> index = new FastGraphIndex<>(graph);
@@ -140,31 +154,38 @@ public class EWC1
             AlgorithmGridReader gridreader = new AlgorithmGridReader(algorithmsPath);
             gridreader.readDocument();
 
-            Map<String, Supplier<Recommender<Long,Long>>> recMap = new HashMap<>();
+            Map<String, Supplier<Recommender<Long, Long>>> recMap = new HashMap<>();
             // Get the different recommenders to execute
             gridreader.getAlgorithms().forEach(algorithm ->
             {
                 AlgorithmGridSelector<Long> ags = new AlgorithmGridSelector<>();
-                recMap.putAll(ags.getRecommenders(algorithm, gridreader.getGrid(algorithm), graph, trainData));
+                Map<String, Supplier<Recommender<Long, Long>>> suppliers = ags.getRecommenders(algorithm, gridreader.getGrid(algorithm), graph, trainData);
+                if (suppliers == null)
+                {
+                    System.err.println("ERROR: Algorithm " + algorithm + " could not be read");
+                }
+                else
+                {
+                    recMap.putAll(ags.getRecommenders(algorithm, gridreader.getGrid(algorithm), graph, trainData));
+                }
             });
 
             timeb = System.currentTimeMillis();
-            System.out.println("Algorithms selected (" +(timeb-timea) + " ms.)");
+            System.out.println("Algorithms selected (" + (timeb - timea) + " ms.)");
             // Select the set of users to be recommended, the format, and the filters to apply to the recommendation
             Set<Long> targetUsers = testData.getUsersWithPreferences().collect(Collectors.toCollection(HashSet::new));
             System.out.println("Num. target users: " + targetUsers.size());
 
             // Prepare the elements for the recommendation:
-            RecommendationFormat<Long, Long> format = new TRECRecommendationFormat<>(lp,lp);
-            Function<Long, IntPredicate> filter = FastFilters.and(FastFilters.notInTrain(trainData), FastFilters.notSelf(index), SocialFastFilters.notReciprocal(graph,index));
-            RecommenderRunner<Long,Long> runner = new FastFilterRecommenderRunner<>(index, index, targetUsers.stream(), filter, maxLength);
+            RecommendationFormat<Long, Long> format = new TRECRecommendationFormat<>(lp, lp);
+            @SuppressWarnings("unchecked") Function<Long, IntPredicate> filter = FastFilters.and(FastFilters.notInTrain(trainData), FastFilters.notSelf(index), SocialFastFilters.notReciprocal(graph, index));
+            RecommenderRunner<Long, Long> runner = new FastFilterRecommenderRunner<>(index, index, targetUsers.stream(), filter, maxLength);
             // Execute the recommendations
             recMap.entrySet().parallelStream().forEach(entry ->
             {
                 String name = entry.getKey();
 
-                String path = outputPath + File.pathSeparator + (weighted ? "weighted" : "unweighted") + File.pathSeparator + name + ".txt";
-                File f = new File(path);
+                String path = outputPath + File.separator + (weighted ? "weighted" : "unweighted") + File.separator + name + ".txt";
 
                 // First, create the nDCG metric (for measuring accuracy)
                 NDCG.NDCGRelevanceModel<Long, Long> ndcgModel = new NDCG.NDCGRelevanceModel<>(false, testData, 0.5);
@@ -172,48 +193,42 @@ public class EWC1
 
                 // Prepare the recommender
                 System.out.println("Preparing " + name);
-                Supplier<Recommender<Long,Long>> recomm = entry.getValue();
+                Supplier<Recommender<Long, Long>> recomm = entry.getValue();
                 long a = System.currentTimeMillis();
                 Recommender<Long, Long> rec = recomm.get();
                 long b = System.currentTimeMillis();
-                System.out.println("Prepared " + name + " (" + (b-a) + " ms.)");
+                System.out.println("Prepared " + name + " (" + (b - a) + " ms.)");
 
-                // Write the recommendations
-                RecommendationFormat.Writer<Long, Long> writer;
-                RecommendationFormat.Reader<Long, Long> reader;
+                // Obtain the nDCG value
+                double value;
                 try
                 {
-                    // Execute the recommendations
-                    writer = format.getWriter(outputPath + name + ".txt");
-
-                    System.out.println("Running " + name);
-                    a = System.currentTimeMillis();
-                    runner.run(rec, writer);
-                    b = System.currentTimeMillis();
-                    System.out.println("Done " + name + " (" + (b - a) + " ms.)");
-
-                    writer.close();
-
-                    // Evaluate the recommendations
-                    reader = format.getReader(path);
-                    reader.readAll().forEach(r -> nDCG.add(r));
-                    if(weighted)
+                    if (printRecommenders)
                     {
-                        weightedValues.put(name, nDCG.evaluate());
+                        value = AuxiliarMethods.computeAndEvaluate(path, rec, runner, nDCG);
                     }
                     else
                     {
-                        unweightedValues.put(name, nDCG.evaluate());
+                        value = AuxiliarMethods.computeAndEvaluate(rec, runner, nDCG);
+                    }
+
+                    if (weighted)
+                    {
+                        weightedValues.put(name, value);
+                    }
+                    else
+                    {
+                        unweightedValues.put(name, value);
                     }
                 }
-                catch(IOException ioe)
+                catch (IOException ioe)
                 {
                     System.err.println("Algorithm " + name + " failed");
                 }
             });
-        });
+        }
 
         // Print the file.
-        AuxiliarMethods.printFile(outputPath+"ewc1.txt", weightedValues, unweightedValues, "BM25", "EBM25", maxLength);
+        AuxiliarMethods.printFile(outputPath + "ewc1.txt", weightedValues, unweightedValues, "Weighted", "Unweighted", maxLength);
     }
 }

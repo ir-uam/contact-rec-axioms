@@ -1,6 +1,7 @@
 /*
- *  Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
- *  de Madrid, http://ir.ii.uam.es
+ * Copyright (C) 2020 Information Retrieval Group at Universidad Autónoma
+ * de Madrid, http://ir.ii.uam.es and Terrier Team at University of Glasgow,
+ * http://terrierteam.dcs.gla.ac.uk/.
  *
  *  This Source Code Form is subject to the terms of the Mozilla Public
  *  License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -14,13 +15,15 @@ import es.uam.eps.ir.contactrecaxioms.recommender.UserFastRankingRecommender;
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 
+import java.util.OptionalDouble;
+
 /**
  * Adaptation of the pivoted normalization vector space model (VSM), without term discrimination.
  *
+ * @param <U> Type of the users.
+ *
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
  * @author Pablo Castells (pablo.castells@uam.es)
- *
- * @param <U> Type of the users.
  */
 public class PivotedNormalizationVSMNoTermDiscrimination<U> extends UserFastRankingRecommender<U>
 {
@@ -56,10 +59,11 @@ public class PivotedNormalizationVSMNoTermDiscrimination<U> extends UserFastRank
 
     /**
      * Constructor.
+     *
      * @param graph the training network.
-     * @param uSel neighborhood orientation selected for the target user.
-     * @param vSel neighborhood orientation selected for the candidate user.
-     * @param s parameter for balancing the importance of the document length.
+     * @param uSel  neighborhood orientation selected for the target user.
+     * @param vSel  neighborhood orientation selected for the candidate user.
+     * @param s     parameter for balancing the importance of the document length.
      */
     public PivotedNormalizationVSMNoTermDiscrimination(FastGraph<U> graph, EdgeOrientation uSel, EdgeOrientation vSel, double s)
     {
@@ -74,17 +78,19 @@ public class PivotedNormalizationVSMNoTermDiscrimination<U> extends UserFastRank
 
         long numUsers = graph.getVertexCount();
 
-        this.avgSize = this.getAllUidx().mapToDouble(vidx ->
+        OptionalDouble opt = this.getAllUidx().mapToDouble(vidx ->
         {
             double idf = graph.getNeighborhood(vidx, this.vSel).count();
-            idf = (numUsers + 1.0)/(idf);
+            idf = (numUsers + 1.0) / (idf);
             this.idfs.put(vidx, idf);
             // User length.
             double len = graph.getNeighborhoodWeights(vidx, vSel).mapToDouble(widx -> widx.v2).sum();
             this.lengths.put(vidx, len);
 
             return len;
-        }).average().getAsDouble();
+        }).average();
+
+        this.avgSize = opt.isPresent() ? opt.getAsDouble() : 0.0;
     }
 
     @Override
@@ -101,12 +107,12 @@ public class PivotedNormalizationVSMNoTermDiscrimination<U> extends UserFastRank
 
             graph.getNeighborhoodWeights(widx, vSel).forEach(v ->
             {
-                double val = (1 + Math.log(1 + Math.log(w.v2)))*uW;//*Math.log(idf);
+                double val = (1 + Math.log(1 + Math.log(w.v2))) * uW;//*Math.log(idf);
                 scoresMap.addTo(v.v1, val);
             });
         });
 
-        scoresMap.replaceAll((vidx, val) -> val/(1-s+s*lengths.get(vidx.intValue())/avgSize));
+        scoresMap.replaceAll((vidx, val) -> val / (1 - s + s * lengths.get(vidx.intValue()) / avgSize));
 
         return scoresMap;
     }
