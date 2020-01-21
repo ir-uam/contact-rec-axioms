@@ -55,14 +55,14 @@ public class EWC3
      */
     public static void main(String[] args)
     {
-        if (args.length < 3)
+        if (args.length < 4)
         {
             System.err.println("ERROR: Invalid arguments");
             System.err.println("Arguments:");
-            System.err.println("\tTrain: file containing the training graph");
-            System.err.println("\tTest: file containing the test graph");
-            System.err.println("\tDirected: true if the graph is directed, false otherwise.");
-            System.err.println("\tFile: the output file");
+            System.err.println("\tTrain: Route of a file containing the training graph.");
+            System.err.println("\tTest: Route of a file containing the test edges.");
+            System.err.println("\tDirected: True if the graph is directed, false otherwise.");
+            System.err.println("\tOutput file: File to store the results.");
             return;
         }
 
@@ -94,11 +94,13 @@ public class EWC3
         // For each pair of orientations, get the reachable users from the target ones:
         try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file))))
         {
+            bw.write("Target user orientation\tCandidate user orientation\tAUC");
             for (EdgeOrientation eo : eos)
             {
                 for (EdgeOrientation eo2 : eos)
                 {
-                    System.out.println(eo + "\t" + eo2 + "started");
+                    long timea = System.currentTimeMillis();
+                    System.out.println(eo + " " + eo2 + " started");
                     Stats posStats = new Stats();
 
                     // For each target user
@@ -151,7 +153,9 @@ public class EWC3
                         }
                     }
 
-                    bw.write(eo + "\t" + eo2 + "\t" + posStats.getMean());
+                    long timeb = System.currentTimeMillis();
+                    System.out.println(eo + " " + eo2 + " finished (" + (timeb-timea) + " ms.)");
+                    bw.write("\n" + eo + "\t" + eo2 + "\t" + posStats.getMean());
                 }
             }
         }
