@@ -63,22 +63,23 @@ public class EWC1
      *               <li><b>Algorithms:</b> Route to an XML file containing the recommender configurations.</li>
      *               <li><b>Output directory:</b> Directory in which to store the recommendations and the output file.</li>
      *               <li><b>Directed:</b> True if the network is directed, false otherwise.</li>
-     *               <li><b>Max. Length:</b> Maximum number of recommendations per user.</li>
+     *               <li><b>Rec. Length:</b> Maximum number of recommendations per user.</li>
      *               <li><b>Print recommendations:</b> True if, additionally to the results, you want to print the recommendations. False otherwise</li>
      *             </ol>
      */
     public static void main(String[] args)
     {
-        if (args.length < 6)
+        if (args.length < 7)
         {
             System.err.println("Invalid arguments.");
             System.err.println("Usage:");
-            System.err.println("\tTrain: Training data");
-            System.err.println("\tTest: Test data");
-            System.err.println("\tAlgorithms: Location of the XML grid file");
-            System.err.println("\tOutput directory: Directory for storing the recommendations");
-            System.err.println("\tDirected: true if the graph is directed, false if not");
-            System.err.println("\tMaxLength: maximum length of the recommendation ranking");
+            System.err.println("\tTrain: Route to the file containing the training graph.");
+            System.err.println("\tTest: Route to the file containing the test links.");
+            System.err.println("\tAlgorithms: Route to an XML file containing the recommender configurations.");
+            System.err.println("\tOutput directory: Directory in which to store the recommendations and the output file.");
+            System.err.println("\tDirected: True if the network is directed, false otherwise.");
+            System.err.println("\tRec. Length: Maximum number of recommendations per user.");
+            System.err.println("\tPrint recommendations: True if, additionally to the results, you want to print the recommendations. False otherwise");
             return;
         }
 

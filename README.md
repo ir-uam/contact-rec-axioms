@@ -90,6 +90,30 @@ After execution, if the `printRecs` option is set to `true`, the output director
 contain the all the recommendations taking the weights of the links into account, and another called `unweighted` which 
 will contain the recommenders when weights are not considered. The base folder will have a `ewc1.txt` file showing the comparison between
 the weighted and unweighted variants. 
+
+### EWC2 Experiment
+The second program, EWC2, compares the nDCG values of different versions of the BM25 algorithm and their corresponding EBM25 version. 
+This program can be used to generate Figure 1(b).
+
+The command to execute this program is the following:
+```
+java -jar contact-rec-axioms.jar ewc2 train test algorithmsFile outputDirectory directed recLength printRecs
+```
+where
+* `train`: is the file containing the training graph.
+* `test`: is the file containing the test edges.
+* `algorithmsFile`: is the XML file containing the algorithms to compare. The only algorithm read will be BM25.
+* `outputDirectory` a directory where to store the recommendations and the comparison file.
+* `directed`: `true` if the graph is directed, `false` otherwise.
+* `recLength`: the maximum number of recommended people for each target user (in our experiments, 10)
+* `printRecs`: `true` if we want to store the recommendations, `false` if we just want the comparison file.
+
+After execution, if the `printRecs` option is set to `true`, the output directory will contain two subdirectories: one called `bm25` which will 
+contain the all the recommendations using the different BM25 variants, and another called `ebm25` which 
+will contain the recommenders when EBM25 is used. The base folder will have a `ewc2.txt` file showing the comparison between
+the BM25 and EBM25 variants. 
+
+
 ## References
 [1] Sanz-Cruzado, J., Castells, P.  Information Retrieval Models for Contact Recommendation in Social Networks. 
 In: ECIR 2019: Advances in Information Retrieval, pp. 148–163. No. 11437 in LNCS, 
