@@ -89,18 +89,26 @@ public class CLNCS
 
         long timea = System.currentTimeMillis();
         // Read the training graph.
-        TextGraphReader<Long> greader = new TextGraphReader<>(directed, weighted, false, "\t", Parsers.lp);
-        FastGraph<Long> graph = (FastGraph<Long>) greader.read(trainDataPath, weighted, false);
-        if (graph == null)
+        // Read the training graph.
+        TextGraphReader<Long> weightedReader = new TextGraphReader<>(directed, true, false,"\t", Parsers.lp);
+        FastGraph<Long> weightedGraph = (FastGraph<Long>) weightedReader.read(trainDataPath, true, false);
+        if (weightedGraph == null)
+        {
+            System.err.println("ERROR: Could not read the training graph");
+            return;
+        }
+
+        TextGraphReader<Long> unweightedReader = new TextGraphReader<>(directed, false, false, "\t", Parsers.lp);
+        FastGraph<Long> unweightedGraph = (FastGraph<Long>) unweightedReader.read(trainDataPath, false, false);
+        if (unweightedGraph == null)
         {
             System.err.println("ERROR: Could not read the training graph");
             return;
         }
 
         // Read the test graph.
-        TextGraphReader<Long> testGraphReader = new TextGraphReader<>(directed, false, false, "\t", Parsers.lp);
-        Graph<Long> auxgraph = testGraphReader.read(testDataPath, false, false);
-        FastGraph<Long> testGraph = (FastGraph<Long>) Adapters.onlyTrainUsers(auxgraph, graph);
+        Graph<Long> auxgraph = unweightedReader.read(testDataPath, false, false);
+        FastGraph<Long> testGraph = (FastGraph<Long>) Adapters.onlyTrainUsers(auxgraph, unweightedGraph);
         if (testGraph == null)
         {
             System.err.println("ERROR: Could not remove users from the test graph");
@@ -111,12 +119,12 @@ public class CLNCS
         System.out.println("Data read (" + (timeb - timea) + " ms.)");
 
         // Read the training and test data
-        FastPreferenceData<Long, Long> trainData;
-        trainData = GraphSimpleFastPreferenceData.load(graph);
+        FastPreferenceData<Long, Long> unweightedTrainData = GraphSimpleFastPreferenceData.load(unweightedGraph);
+        FastPreferenceData<Long, Long> weightedTrainData = GraphSimpleFastPreferenceData.load(weightedGraph);
 
         FastPreferenceData<Long, Long> testData;
         testData = GraphSimpleFastPreferenceData.load(testGraph);
-        GraphIndex<Long> index = new FastGraphIndex<>(graph);
+        GraphIndex<Long> index = new FastGraphIndex<>(unweightedGraph);
         int numUsers = testData.numUsersWithPreferences();
 
         // Read the XML containing the parameter grid for each algorithm
@@ -162,29 +170,54 @@ public class CLNCS
                     NDCG.NDCGRelevanceModel<Long, Long> ndcgModel = new NDCG.NDCGRelevanceModel<>(false, testData, 0.5);
                     SystemMetric<Long, Long> nDCG = new AverageRecommendationMetric<>(new NDCG<>(maxLength, ndcgModel), true);
 
-                    @SuppressWarnings("unchecked") Function<Long, IntPredicate> filter = FastFilters.and(FastFilters.notInTrain(trainData), FastFilters.notSelf(index), SocialFastFilters.notReciprocal(graph, index));
+                    @SuppressWarnings("unchecked") Function<Long, IntPredicate> filter = FastFilters.and(FastFilters.notInTrain(unweightedTrainData), FastFilters.notSelf(index), SocialFastFilters.notReciprocal(unweightedGraph, index));
                     RecommenderRunner<Long, Long> runner = new FastFilterRecommenderRunner<>(index, index, testData.getUsersWithPreferences(), filter, maxLength);
 
                     try
                     {
-                        Recommender<Long, Long> lenNorm = lenNormSupp.v2().apply(graph, trainData);
-                        Recommender<Long, Long> noLenNorm = noLenNormSupp.v2().apply(graph, trainData);
+                        Recommender<Long, Long> unweightedLenNorm = lenNormSupp.v2().apply(unweightedGraph, unweightedTrainData);
+                        Recommender<Long, Long> unweightedNoLenNorm = noLenNormSupp.v2().apply(unweightedGraph, unweightedTrainData);
+                        Recommender<Long, Long> weightedLenNorm = lenNormSupp.v2().apply(weightedGraph, weightedTrainData);
+                        Recommender<Long, Long> weightedNoLenNorm = noLenNormSupp.v2().apply(weightedGraph, weightedTrainData);
 
-                        double lenNormValue;
-                        double noLenNormValue;
+                        double unweightedLenNormValue;
+                        double unweightedNoLenNormValue;
+                        double weightedLenNormValue = 0;
+                        double weightedNoLenNormValue = 0;
+
                         if(printRecs)
                         {
-                            lenNormValue = AuxiliarMethods.computeAndEvaluate(lenNormDirectory + lenNormName + ".txt", lenNorm, runner, nDCG, numUsers);
-                            noLenNormValue = AuxiliarMethods.computeAndEvaluate(noLenNormDirectory + noLenNormName + ".txt", noLenNorm, runner, nDCG, numUsers);
+                            if(weighted)
+                            {
+                                weightedLenNormValue = AuxiliarMethods.computeAndEvaluate(lenNormDirectory + "wei_" + lenNormName + ".txt", weightedLenNorm, runner, nDCG, numUsers);
+                                weightedNoLenNormValue = AuxiliarMethods.computeAndEvaluate(noLenNormDirectory + "wei_" + noLenNormName + ".txt", weightedNoLenNorm, runner, nDCG, numUsers);
+                            }
+                            unweightedLenNormValue = AuxiliarMethods.computeAndEvaluate(lenNormDirectory + (weighted ? "unw_" : "") + lenNormName + ".txt", unweightedLenNorm, runner, nDCG, numUsers);
+                            unweightedNoLenNormValue = AuxiliarMethods.computeAndEvaluate(noLenNormDirectory + noLenNormName + ".txt", unweightedNoLenNorm, runner, nDCG, numUsers);
                         }
                         else
                         {
-                            lenNormValue = AuxiliarMethods.computeAndEvaluate(lenNorm, runner, nDCG, numUsers);
-                            noLenNormValue = AuxiliarMethods.computeAndEvaluate(noLenNorm, runner, nDCG, numUsers);
+                            if(weighted)
+                            {
+                                weightedLenNormValue = AuxiliarMethods.computeAndEvaluate(weightedLenNorm, runner, nDCG, numUsers);
+                                weightedNoLenNormValue = AuxiliarMethods.computeAndEvaluate(weightedNoLenNorm, runner, nDCG, numUsers);
+                            }
+                            unweightedLenNormValue = AuxiliarMethods.computeAndEvaluate(unweightedLenNorm, runner, nDCG, numUsers);
+                            unweightedNoLenNormValue = AuxiliarMethods.computeAndEvaluate(unweightedNoLenNorm, runner, nDCG, numUsers);
                         }
 
-                        lenNormValues.put(lenNormName, lenNormValue);
-                        noLenNormValues.put(lenNormName, noLenNormValue);
+                        if(weighted)
+                        {
+                            lenNormValues.put("wei_" + lenNormName, weightedLenNormValue);
+                            noLenNormValues.put("wei_" + lenNormName, weightedNoLenNormValue);
+                            lenNormValues.put("unw_" + lenNormName, unweightedLenNormValue);
+                            noLenNormValues.put("unw_" + lenNormName, unweightedNoLenNormValue);
+                        }
+                        else
+                        {
+                            lenNormValues.put(lenNormName, unweightedLenNormValue);
+                            noLenNormValues.put(lenNormName, unweightedNoLenNormValue);
+                        }
 
                         long timebb = System.currentTimeMillis();
                         System.out.println("Algorithm " + lenNormName + " finished (" + (timebb-timeaa) + " ms.)");
