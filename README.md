@@ -67,75 +67,13 @@ a different neighborhood for the length.
 ## Installation
 
 ## Execution
+The descriptions for the different programs is included in the Wiki for this project. We include here the links to the descriptions. 
 
-### EWC1 Experiment
-The first program, EWC1, compares the nDCG values of several algorithms depending on whether the weights of the links are used to generate
-the recommendation or not (i.e. if the frequencies for the IR algorithms are binary or not). This program can be used to generate
-Figure 1(a).
-
-The command to execute this program is the following:
-```
-java -jar contact-rec-axioms.jar ewc1 train test algorithmsFile outputDirectory directed recLength printRecs
-```
-where
-* `train`: is the file containing the training graph.
-* `test`: is the file containing the test edges.
-* `algorithmsFile`: is the XML file containing the algorithms to compare
-* `outputDirectory` a directory where to store the recommendations and the comparison file.
-* `directed`: `true` if the graph is directed, `false` otherwise.
-* `recLength`: the maximum number of recommended people for each target user (in our experiments, 10)
-* `printRecs`: `true` if we want to store the recommendations, `false` if we just want the comparison file.
-
-After execution, if the `printRecs` option is set to `true`, the output directory will contain two subdirectories: one called `weighted` which will 
-contain the all the recommendations taking the weights of the links into account, and another called `unweighted` which 
-will contain the recommenders when weights are not considered. The base folder will have a `ewc1.txt` file showing the comparison between
-the weighted and unweighted variants. 
-
-### EWC2 Experiment
-The second program, EWC2, compares the nDCG values of different versions of the BM25 algorithm and their corresponding EBM25 version. 
-This program can be used to generate Figure 1(b).
-
-The command to execute this program is the following:
-```
-java -jar contact-rec-axioms.jar ewc2 train test algorithmsFile outputDirectory directed recLength printRecs
-```
-where
-* `train`: is the file containing the training graph.
-* `test`: is the file containing the test edges.
-* `algorithmsFile`: is the XML file containing the algorithms to compare. The only algorithm read will be BM25.
-* `outputDirectory` a directory where to store the recommendations and the comparison file.
-* `directed`: `true` if the graph is directed, `false` otherwise.
-* `recLength`: the maximum number of recommended people for each target user (in our experiments, 10)
-* `printRecs`: `true` if we want to store the recommendations, `false` if we just want the comparison file.
-
-After execution, if the `printRecs` option is set to `true`, the output directory will contain two subdirectories: one called `bm25` which will 
-contain the all the recommendations using the different BM25 variants, and another called `ebm25` which 
-will contain the recommenders when EBM25 is used. The base folder will have a `ewc2.txt` file showing the comparison between
-the BM25 and EBM25 variants. 
-
-### EWC3 Experiment
-The third program, EWC3, sorts the users at two steps from the target user, and computes the area under the ROC curve metric (AUC). The metric is averaged
-over the different users that, at least, have one connection in the test set to the selected candidate users (for the rest, the AUC metric cannot be computed).
-This program can be used to generate Table 5.
-
-For directed graphs, candidate users are selected according to the orientation selection for the target and candidate users. For directed graphs, although the programfinds the AUC metric for all possible orientation selections,only the value for taking the undirected neighborhood of the target users <img src="https://latex.codecogs.com/gif.latex?u" /> (`UND`, <img src="https://latex.codecogs.com/gif.latex?\Gamma^q(u)=\Gamma_{und}(u)" />)
-and the incoming one for the candidate ones <img src="https://latex.codecogs.com/gif.latex?v" />  (`IN`, <img src="https://latex.codecogs.com/gif.latex?\Gamma^d(v)=\Gamma_{in}(v)" />) was
-included in Table 5.
-
-The command to execute this program is the following:
-```
-java -jar contact-rec-axioms.jar ewc3 train test outputDirectory directed printRecs
-```
-where
-* `train`: is the file containing the training graph.
-* `test`: is the file containing the test edges.
-* `outputDirectory` a directory where to store the recommendations and the comparison file.
-* `directed`: `true` if the graph is directed, `false` otherwise.
-* `printRecs`: `true` if we want to store the recommendations, `false` if we just want the comparison file.
-
-After execution, if the `printRecs` option is set to `true`, the output directory will contain a subdirectory called `mcncurves` which will 
-contain the all the recommendation rankings for each variant. The base folder will have a `ewc3.txt` file showing the AUC values for each
-one.
+* [EWC1](https://github.com/ir-uam/contact-rec-axioms/wiki/EWC1)
+* [EWC2](https://github.com/ir-uam/contact-rec-axioms/wiki/EWC2)
+* [EWC3](https://github.com/ir-uam/contact-rec-axioms/wiki/EWC3)
+* [NDC](https://github.com/ir-uam/contact-rec-axioms/wiki/NDC)
+* [CLNCS](https://github.com/ir-uam/contact-rec-axioms/wiki/CLNCS)
 
 ## References
 [1] Sanz-Cruzado, J., Castells, P.  Information Retrieval Models for Contact Recommendation in Social Networks. 
