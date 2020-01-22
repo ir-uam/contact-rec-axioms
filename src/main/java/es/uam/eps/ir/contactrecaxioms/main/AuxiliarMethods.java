@@ -9,6 +9,7 @@
  */
 package es.uam.eps.ir.contactrecaxioms.main;
 
+import es.uam.eps.ir.contactrecaxioms.recommender.io.EmptyWriter;
 import es.uam.eps.ir.ranksys.core.Recommendation;
 import es.uam.eps.ir.ranksys.metrics.SystemMetric;
 import es.uam.eps.ir.ranksys.rec.Recommender;
@@ -139,31 +140,5 @@ public class AuxiliarMethods
         }
     }
 
-    private static class EmptyWriter<U, I> implements RecommendationFormat.Writer<U, I>, RecommendationFormat.Reader<U, I>
-    {
-        private final List<Recommendation<U, I>> recs;
 
-        public EmptyWriter()
-        {
-            this.recs = new ArrayList<>();
-        }
-
-        @Override
-        public void write(Recommendation<U, I> recommendation)
-        {
-            this.recs.add(recommendation);
-        }
-
-        @Override
-        public void close()
-        {
-
-        }
-
-        @Override
-        public Stream<Recommendation<U, I>> readAll()
-        {
-            return recs.stream();
-        }
-    }
 }
