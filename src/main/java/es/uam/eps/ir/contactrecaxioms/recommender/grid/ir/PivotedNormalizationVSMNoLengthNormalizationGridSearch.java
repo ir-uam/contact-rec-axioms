@@ -62,8 +62,8 @@ public class PivotedNormalizationVSMNoLengthNormalizationGridSearch<U> implement
         List<EdgeOrientation> vSels = grid.getOrientationValues(VSEL);
 
         uSels.forEach(uSel ->
-                vSels.forEach(vSel ->
-                        recs.put(PIVOTEDNOLEN + "_" + uSel + "_" + vSel, (graph, prefData) -> new PivotedNormalizationVSMNoLengthNormalization<>(graph, uSel, vSel))));
+            vSels.forEach(vSel ->
+                recs.put(PIVOTEDNOLEN + "_" + uSel + "_" + vSel, (graph, prefData) -> new PivotedNormalizationVSMNoLengthNormalization<>(graph, uSel, vSel))));
 
         return recs;
     }

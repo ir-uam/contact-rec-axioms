@@ -29,6 +29,7 @@ import es.uam.eps.ir.ranksys.rec.runner.fast.FastFilterRecommenderRunner;
 import es.uam.eps.ir.ranksys.rec.runner.fast.FastFilters;
 import org.ranksys.formats.parsing.Parsers;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,11 +55,12 @@ public class NDC
      *             <ol>
      *               <li><b>Train:</b> Route to the file containing the training graph.</li>
      *               <li><b>Test:</b> Route to the file containing the test links.</li>
-     *               <li><b>Algorithms:</b> Route to an XML file containing the recommender configurations</li>
-     *               <li><b>Output directory:</b> Directory in which to store the recommendations and the output file.</li>
+     *               <li><b>Algorithms:</b> Route to an XML file containing the recommender configurations. Only algorithms with a version without term discrimination will be executed</li>
+     *               <li><b>Output directory:</b> Directory in which to store the recommendations and the output files.</li>
      *               <li><b>Directed:</b> True if the network is directed, false otherwise.</li>
      *               <li><b>Weighted:</b> True if the network is weighted, false otherwise.</li>
-     *               <li><b>Max. Length:</b> Maximum number of recommendations per user.</li>
+     *               <li><b>Rec. Length:</b> Maximum number of recommendations per user.</li>
+     *               <li><b>Print recommendations:</b> True if, additionally to the results, you want to print the recommendations. False otherwise</li>
      *             </ol>
      */
     public static void main(String[] args)
@@ -67,12 +69,14 @@ public class NDC
         {
             System.err.println("Invalid arguments.");
             System.err.println("Usage:");
-            System.err.println("\tTrain: Training data.");
-            System.err.println("\tTest: Test data.");
-            System.err.println("\tAlgorithms: XML file containing the configuration for the BM25 algorithm.");
-            System.err.println("\tOutput directory: Directory for storing the recommendations and the output file.");
-            System.err.println("\tDirected: true if the graph is directed, false if not.");
-            System.err.println("\tMaxLength: maximum length of the recommendation ranking.");
+            System.err.println("\tTrain: Route to the file containing the training graph.");
+            System.err.println("\tTest: Route to the file containing the test links.");
+            System.err.println("\tAlgorithms: Route to an XML file containing the recommender configuration. Only algorithms with a version without term discrimination will be executed.");
+            System.err.println("\tOutput directory: Directory in which to store the recommendations and the output files.");
+            System.err.println("\tDirected: True if the network is directed, false otherwise.");
+            System.err.println("\tWeighted: True if the network is weighted, false otherwise.");
+            System.err.println("\tRec. Length: Maximum number of recommendations per user.");
+            System.err.println("\tPrint recommendations: True if, additionally to the results, you want to print the recommendations. False otherwise");
             return;
         }
 
@@ -83,29 +87,30 @@ public class NDC
         String outputPath = args[3];
         boolean directed = args[4].equalsIgnoreCase("true");
         boolean weighted = args[5].equalsIgnoreCase("true");
-
         int maxLength = Parsers.ip.parse(args[6]);
+        boolean printRecs = args[7].equalsIgnoreCase("true");
 
         long timea = System.currentTimeMillis();
         // Read the training graph.
-        TextGraphReader<Long> greader = new TextGraphReader<>(directed, weighted, false, "\t", Parsers.lp);
-        Graph<Long> auxgraph = greader.read(trainDataPath, weighted, false);
-        if (auxgraph == null)
+        TextGraphReader<Long> weightedReader = new TextGraphReader<>(directed, true, false,"\t", Parsers.lp);
+        FastGraph<Long> weightedGraph = (FastGraph<Long>) weightedReader.read(trainDataPath, true, false);
+        if (weightedGraph == null)
         {
             System.err.println("ERROR: Could not read the training graph");
             return;
         }
 
-        FastGraph<Long> graph = (FastGraph<Long>) Adapters.removeAutoloops(auxgraph);
-        if (graph == null)
+        TextGraphReader<Long> unweightedReader = new TextGraphReader<>(directed, false, false, "\t", Parsers.lp);
+        FastGraph<Long> unweightedGraph = (FastGraph<Long>) unweightedReader.read(trainDataPath, false, false);
+        if (unweightedGraph == null)
         {
-            System.err.println("ERROR: Could not remove autoloops from the training graph");
+            System.err.println("ERROR: Could not read the training graph");
             return;
         }
 
         // Read the test graph.
-        auxgraph = greader.read(testDataPath, false, false);
-        FastGraph<Long> testGraph = (FastGraph<Long>) Adapters.onlyTrainUsers(auxgraph, graph);
+        Graph<Long> auxgraph = unweightedReader.read(testDataPath, false, false);
+        FastGraph<Long> testGraph = (FastGraph<Long>) Adapters.onlyTrainUsers(auxgraph, unweightedGraph);
         if (testGraph == null)
         {
             System.err.println("ERROR: Could not remove users from the test graph");
@@ -116,12 +121,12 @@ public class NDC
         System.out.println("Data read (" + (timeb - timea) + " ms.)");
 
         // Read the training and test data
-        FastPreferenceData<Long, Long> trainData;
-        trainData = GraphSimpleFastPreferenceData.load(graph);
+        FastPreferenceData<Long, Long> unweightedTrainData = GraphSimpleFastPreferenceData.load(unweightedGraph);
+        FastPreferenceData<Long, Long> weightedTrainData = GraphSimpleFastPreferenceData.load(weightedGraph);
 
         FastPreferenceData<Long, Long> testData;
         testData = GraphSimpleFastPreferenceData.load(testGraph);
-        GraphIndex<Long> index = new FastGraphIndex<>(graph);
+        GraphIndex<Long> index = new FastGraphIndex<>(unweightedGraph);
 
         // Read the XML containing the parameter grid for each algorithm
         AlgorithmGridReader gridreader = new AlgorithmGridReader(algorithmsPath);
@@ -129,20 +134,39 @@ public class NDC
 
         Set<String> algorithms = gridreader.getAlgorithms();
 
-        Map<String, Double> tdValues = new HashMap<>();
-        Map<String, Double> noTDValues = new HashMap<>();
+        String tdDirectory = outputPath + "td" + File.separator;
+        String noTdDirectory = outputPath + "notd" + File.separator;
+        // If we choose to print the recommendations, create the folders to store them.
+        if(printRecs)
+        {
+            File file = new File(tdDirectory);
+            file.mkdir();
+            file = new File(noTdDirectory);
+            file.mkdir();
+        }
 
+        int numUsers = testData.numUsersWithPreferences();
+
+        // For each algorithm.
         algorithms.forEach(tdIdentifier ->
         {
+            // First, create the maps for the values.
+            Map<String, Double> tdValues = new HashMap<>();
+            Map<String, Double> noTDValues = new HashMap<>();
+
+            // Get the identifier of the version of the algorithm without term discrimination.
             String noTdIdentifier = NDC.getNoTermDiscriminationVersion(tdIdentifier);
 
-            if (noTdIdentifier != null) // If it exists
+            if (noTdIdentifier != null) // If it exists (otherwise, ignore the algorithm)
             {
+                System.out.println("-------- Starting algorithm " + tdIdentifier + " --------");
+                long timeaa = System.currentTimeMillis();
                 Grid grid = gridreader.getGrid(tdIdentifier);
                 Configurations confs = grid.getConfigurations();
                 AlgorithmGridSelector<Long> algorithmSelector = new AlgorithmGridSelector<>();
 
-                confs.getConfigurations().parallelStream().forEach(parameters ->
+                // Now, execute each possible variant.
+                confs.getConfigurations().forEach(parameters ->
                 {
                     Tuple2oo<String, RecommendationAlgorithmFunction<Long>> tdSupp = algorithmSelector.getRecommender(tdIdentifier, parameters);
                     Tuple2oo<String, RecommendationAlgorithmFunction<Long>> noTdSupp = algorithmSelector.getRecommender(noTdIdentifier, parameters);
@@ -150,38 +174,82 @@ public class NDC
                     String noTdName = noTdSupp.v1();
 
                     // First, obtain the metric.
-                    NDCG.NDCGRelevanceModel<Long, Long> ndcgModel = new NDCG.NDCGRelevanceModel<>(false, testData, 0.5);
+                    NDCG.NDCGRelevanceModel<Long, Long> ndcgModel = new NDCG.NDCGRelevanceModel<>(false, testData, 1.0);
                     SystemMetric<Long, Long> nDCG = new AverageRecommendationMetric<>(new NDCG<>(maxLength, ndcgModel), true);
 
+                    // Configure the recommender runner
                     @SuppressWarnings("unchecked")
-                    Function<Long, IntPredicate> filter = FastFilters.and(FastFilters.notInTrain(trainData), FastFilters.notSelf(index), SocialFastFilters.notReciprocal(graph, index));
+                    Function<Long, IntPredicate> filter = FastFilters.and(FastFilters.notInTrain(unweightedTrainData), FastFilters.notSelf(index), SocialFastFilters.notReciprocal(unweightedGraph, index));
                     RecommenderRunner<Long, Long> runner = new FastFilterRecommenderRunner<>(index, index, testData.getUsersWithPreferences(), filter, maxLength);
 
                     try
                     {
-                        Recommender<Long, Long> td = tdSupp.v2().apply(graph, trainData);
-                        double tdValue = AuxiliarMethods.computeAndEvaluate(outputPath + tdName + ".txt", td, runner, nDCG);
+                        Recommender<Long, Long> weightedTd = tdSupp.v2().apply(weightedGraph, weightedTrainData);
+                        Recommender<Long, Long> weightedNoTd = noTdSupp.v2().apply(weightedGraph, weightedTrainData);
+                        Recommender<Long, Long> unweightedTd = tdSupp.v2().apply(unweightedGraph, unweightedTrainData);
+                        Recommender<Long, Long> unweightedNoTd = noTdSupp.v2().apply(unweightedGraph, unweightedTrainData);
 
-                        Recommender<Long, Long> noTd = noTdSupp.v2().apply(graph, trainData);
-                        double noTdValue = AuxiliarMethods.computeAndEvaluate(outputPath + noTdName + ".txt", noTd, runner, nDCG);
+                        double weightedTdValue = 0;
+                        double weightedNoTdValue = 0;
+                        double unweightedTdValue;
+                        double unweightedNoTdValue;
 
-                        tdValues.put(tdName, tdValue);
-                        noTDValues.put(tdName, noTdValue);
+                        if(printRecs) // If we want to print the recommendations
+                        {
+                            if(weighted)
+                            {
+                                weightedTdValue = AuxiliarMethods.computeAndEvaluate(tdDirectory + "wei_" + tdName + ".txt", weightedTd, runner, nDCG, numUsers);
+                                weightedNoTdValue = AuxiliarMethods.computeAndEvaluate(noTdDirectory + "wei_" + noTdName + ".txt", weightedNoTd, runner, nDCG, numUsers);
+                            }
+
+                            unweightedTdValue = AuxiliarMethods.computeAndEvaluate(tdDirectory + (weighted ? "unw_" : "") + tdName + ".txt", unweightedTd, runner, nDCG, numUsers);
+                            unweightedNoTdValue = AuxiliarMethods.computeAndEvaluate(noTdDirectory + (weighted ? "unw_" : "") + noTdName + ".txt", unweightedNoTd, runner, nDCG, numUsers);
+                        }
+                        else // Otherwise
+                        {
+                            if(weighted)
+                            {
+                                weightedTdValue = AuxiliarMethods.computeAndEvaluate(weightedTd, runner, nDCG, numUsers);
+                                weightedNoTdValue = AuxiliarMethods.computeAndEvaluate(weightedNoTd, runner, nDCG, numUsers);
+                            }
+                            unweightedTdValue = AuxiliarMethods.computeAndEvaluate(unweightedTd, runner, nDCG, numUsers);
+                            unweightedNoTdValue = AuxiliarMethods.computeAndEvaluate(unweightedNoTd, runner, nDCG, numUsers);
+                        }
+
+                        long timebb = System.currentTimeMillis();
+                        System.out.println("Algorithm " + tdName + " finished (" + (timebb-timeaa) + " ms.)");
+
+                        // Store the nDCG values.
+                        if(weighted)
+                        {
+                            tdValues.put("wei_" + tdName, weightedTdValue);
+                            noTDValues.put("wei_" + tdName, weightedNoTdValue);
+                            tdValues.put("unw_" + tdName, unweightedTdValue);
+                            noTDValues.put("unw_" + tdName, unweightedNoTdValue);
+                        }
+                        else
+                        {
+                            tdValues.put(tdName, unweightedTdValue);
+                            noTDValues.put(tdName, unweightedNoTdValue);
+                        }
+
                     }
                     catch (IOException ioe)
                     {
                         System.err.println("ERROR: Something failed while executing " + tdName);
                     }
                 });
+
+                // Print the file for this algorithm.
+                AuxiliarMethods.printFile(outputPath + "ndc_" + tdIdentifier + ".txt", tdValues, noTDValues, "TD", "No TD", maxLength);
+                long timecc = System.currentTimeMillis();
+                System.out.println("-------- Finished algorithm " + tdIdentifier + " (" + (timecc-timeaa) + " ms.) --------");
             }
             else
             {
                 System.err.println("Algorithm " + tdIdentifier + " has no version without term discrimination");
             }
         });
-
-        AuxiliarMethods.printFile(outputPath + "ndc.txt", tdValues, noTDValues, "TD", "No TD", maxLength);
-
     }
 
     /**

@@ -132,6 +132,7 @@ public class Validation
         AlgorithmGridSelector<Long> ags = new AlgorithmGridSelector<>();
         @SuppressWarnings("unchecked") Function<Long, IntPredicate> filter = FastFilters.and(FastFilters.notInTrain(trainData), FastFilters.notSelf(index), SocialFastFilters.notReciprocal(graph, index));
         Set<Long> targetUsers = testData.getUsersWithPreferences().collect(Collectors.toCollection(HashSet::new));
+        int numUsers = testData.numUsersWithPreferences();
 
         System.out.println("Num. target users: " + targetUsers.size());
 
@@ -182,11 +183,11 @@ public class Validation
                 {
                     if (printRecommendations)
                     {
-                        value = AuxiliarMethods.computeAndEvaluate(route + name + ".txt", rec, runner, nDCG);
+                        value = AuxiliarMethods.computeAndEvaluate(route + name + ".txt", rec, runner, nDCG, numUsers);
                     }
                     else
                     {
-                        value = AuxiliarMethods.computeAndEvaluate(rec, runner, nDCG);
+                        value = AuxiliarMethods.computeAndEvaluate(rec, runner, nDCG, numUsers);
                     }
 
                     // Add the variant to the ranking

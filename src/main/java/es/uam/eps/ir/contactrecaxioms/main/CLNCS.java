@@ -85,26 +85,21 @@ public class CLNCS
         boolean directed = args[4].equalsIgnoreCase("true");
         boolean weighted = args[5].equalsIgnoreCase("true");
         int maxLength = Parsers.ip.parse(args[6]);
+        boolean printRecs = args[7].equalsIgnoreCase("true");
 
         long timea = System.currentTimeMillis();
         // Read the training graph.
         TextGraphReader<Long> greader = new TextGraphReader<>(directed, weighted, false, "\t", Parsers.lp);
-        Graph<Long> auxgraph = greader.read(trainDataPath, weighted, false);
-        if (auxgraph == null)
+        FastGraph<Long> graph = (FastGraph<Long>) greader.read(trainDataPath, weighted, false);
+        if (graph == null)
         {
             System.err.println("ERROR: Could not read the training graph");
             return;
         }
 
-        FastGraph<Long> graph = (FastGraph<Long>) Adapters.removeAutoloops(auxgraph);
-        if (graph == null)
-        {
-            System.err.println("ERROR: Could not remove autoloops from the training graph");
-            return;
-        }
-
         // Read the test graph.
-        auxgraph = greader.read(testDataPath, false, false);
+        TextGraphReader<Long> testGraphReader = new TextGraphReader<>(directed, false, false, "\t", Parsers.lp);
+        Graph<Long> auxgraph = testGraphReader.read(testDataPath, false, false);
         FastGraph<Long> testGraph = (FastGraph<Long>) Adapters.onlyTrainUsers(auxgraph, graph);
         if (testGraph == null)
         {
@@ -122,6 +117,7 @@ public class CLNCS
         FastPreferenceData<Long, Long> testData;
         testData = GraphSimpleFastPreferenceData.load(testGraph);
         GraphIndex<Long> index = new FastGraphIndex<>(graph);
+        int numUsers = testData.numUsersWithPreferences();
 
         // Read the XML containing the parameter grid for each algorithm
         AlgorithmGridReader gridreader = new AlgorithmGridReader(algorithmsPath);
@@ -129,25 +125,38 @@ public class CLNCS
 
         Set<String> algorithms = gridreader.getAlgorithms();
 
-        Map<String, Double> lenNormValues = new HashMap<>();
-        Map<String, Double> noLenNormValues = new HashMap<>();
+        String lenNormDirectory = outputPath + "lennorm" + File.separator;
+        String noLenNormDirectory = outputPath + "nolennorm" + File.separator;
+        // If we choose to print the recommendations, create the folders to store them.
+        if(printRecs)
+        {
+            File file = new File(lenNormDirectory);
+            file.mkdir();
+            file = new File(noLenNormDirectory);
+            file.mkdir();
+        }
 
         algorithms.forEach(lenNormIdentifier ->
         {
-            String noLenNormIdentifier = CLNCS.getNoTermDiscriminationVersion(lenNormIdentifier);
+            String noLenNormIdentifier = CLNCS.getNoLengthNormalizationVersion(lenNormIdentifier);
+
+            Map<String, Double> lenNormValues = new HashMap<>();
+            Map<String, Double> noLenNormValues = new HashMap<>();
 
             if (noLenNormIdentifier != null) // If it exists
             {
+                System.out.println("-------- Starting algorithm " + lenNormIdentifier + " --------");
+                long timeaa = System.currentTimeMillis();
                 Grid grid = gridreader.getGrid(lenNormIdentifier);
                 Configurations confs = grid.getConfigurations();
                 AlgorithmGridSelector<Long> algorithmSelector = new AlgorithmGridSelector<>();
 
-                confs.getConfigurations().parallelStream().forEach(parameters ->
+                confs.getConfigurations().forEach(parameters ->
                 {
                     Tuple2oo<String, RecommendationAlgorithmFunction<Long>> lenNormSupp = algorithmSelector.getRecommender(lenNormIdentifier, parameters);
                     Tuple2oo<String, RecommendationAlgorithmFunction<Long>> noLenNormSupp = algorithmSelector.getRecommender(noLenNormIdentifier, parameters);
-                    String tdName = lenNormSupp.v1();
-                    String noTdName = noLenNormSupp.v1();
+                    String lenNormName = lenNormSupp.v1();
+                    String noLenNormName = noLenNormSupp.v1();
 
                     // First, obtain the metric.
                     NDCG.NDCGRelevanceModel<Long, Long> ndcgModel = new NDCG.NDCGRelevanceModel<>(false, testData, 0.5);
@@ -159,19 +168,37 @@ public class CLNCS
                     try
                     {
                         Recommender<Long, Long> lenNorm = lenNormSupp.v2().apply(graph, trainData);
-                        double tdValue = AuxiliarMethods.computeAndEvaluate(outputPath + File.pathSeparator + tdName + ".txt", lenNorm, runner, nDCG);
-
                         Recommender<Long, Long> noLenNorm = noLenNormSupp.v2().apply(graph, trainData);
-                        double noTdValue = AuxiliarMethods.computeAndEvaluate(outputPath + File.pathSeparator + noTdName + ".txt", noLenNorm, runner, nDCG);
 
-                        lenNormValues.put(tdName, tdValue);
-                        noLenNormValues.put(tdName, noTdValue);
+                        double lenNormValue;
+                        double noLenNormValue;
+                        if(printRecs)
+                        {
+                            lenNormValue = AuxiliarMethods.computeAndEvaluate(lenNormDirectory + lenNormName + ".txt", lenNorm, runner, nDCG, numUsers);
+                            noLenNormValue = AuxiliarMethods.computeAndEvaluate(noLenNormDirectory + noLenNormName + ".txt", noLenNorm, runner, nDCG, numUsers);
+                        }
+                        else
+                        {
+                            lenNormValue = AuxiliarMethods.computeAndEvaluate(lenNorm, runner, nDCG, numUsers);
+                            noLenNormValue = AuxiliarMethods.computeAndEvaluate(noLenNorm, runner, nDCG, numUsers);
+                        }
+
+                        lenNormValues.put(lenNormName, lenNormValue);
+                        noLenNormValues.put(lenNormName, noLenNormValue);
+
+                        long timebb = System.currentTimeMillis();
+                        System.out.println("Algorithm " + lenNormName + " finished (" + (timebb-timeaa) + " ms.)");
                     }
                     catch (IOException ioe)
                     {
-                        System.err.println("ERROR: Something failed while executing " + tdName);
+                        System.err.println("ERROR: Something failed while executing " + lenNormName);
                     }
                 });
+
+                // Print the file for this algorithm.
+                AuxiliarMethods.printFile(outputPath + "clncs_" + lenNormIdentifier + ".txt", lenNormValues, noLenNormValues, "Len. Norm.", "No Len. Norm.", maxLength);
+                long timecc = System.currentTimeMillis();
+                System.out.println("-------- Finished algorithm " + lenNormIdentifier + " (" + (timecc-timeaa) + " ms.) --------");
             }
             else
             {
@@ -179,7 +206,7 @@ public class CLNCS
             }
         });
 
-        AuxiliarMethods.printFile(outputPath + "lncs.txt", lenNormValues, noLenNormValues, "Len Norm.", "No Len Norm.", maxLength);
+
     }
 
     /**
@@ -189,7 +216,7 @@ public class CLNCS
      *
      * @return the identifier of the algorithm if it exists, null otherwise.
      */
-    private static String getNoTermDiscriminationVersion(String algorithm)
+    private static String getNoLengthNormalizationVersion(String algorithm)
     {
         switch (algorithm)
         {

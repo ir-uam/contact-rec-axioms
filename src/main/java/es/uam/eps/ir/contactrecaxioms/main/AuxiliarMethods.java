@@ -49,7 +49,7 @@ public class AuxiliarMethods
      *
      * @throws IOException if something fails during the writing / reading of the recommendation file.
      */
-    public static double computeAndEvaluate(String output, Recommender<Long, Long> recommender, RecommenderRunner<Long, Long> runner, SystemMetric<Long, Long> metric) throws IOException
+    public static double computeAndEvaluate(String output, Recommender<Long, Long> recommender, RecommenderRunner<Long, Long> runner, SystemMetric<Long, Long> metric, int numUsers) throws IOException
     {
         RecommendationFormat<Long, Long> format = new SimpleRecommendationFormat<>(Parsers.lp, Parsers.lp);
         RecommendationFormat.Writer<Long, Long> writer;
@@ -62,8 +62,12 @@ public class AuxiliarMethods
         writer.close();
 
         reader = format.getReader(output);
-        reader.readAll().forEach(metric::add);
-        return metric.evaluate();
+        int totalrecs = reader.readAll().mapToInt(rec ->
+        {
+            metric.add(rec);
+            return 1;
+        }).sum();
+        return metric.evaluate()*(totalrecs+0.0)/(numUsers+0.0);
     }
 
     /**
@@ -75,14 +79,19 @@ public class AuxiliarMethods
      *
      * @return the value of the metric.
      */
-    public static double computeAndEvaluate(Recommender<Long, Long> recommender, RecommenderRunner<Long, Long> runner, SystemMetric<Long, Long> metric)
+    public static double computeAndEvaluate(Recommender<Long, Long> recommender, RecommenderRunner<Long, Long> runner, SystemMetric<Long, Long> metric, int numUsers)
     {
         EmptyWriter<Long, Long> writer = new EmptyWriter<>();
         runner.run(recommender, writer);
 
         metric.reset();
-        writer.readAll().forEach(metric::add);
-        return metric.evaluate();
+        int totalrecs = writer.readAll().mapToInt(rec ->
+        {
+            metric.add(rec);
+            return 1;
+        }).sum();
+
+        return metric.evaluate()*(totalrecs+0.0)/(numUsers+0.0);
     }
 
     /**

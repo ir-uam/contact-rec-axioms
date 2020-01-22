@@ -57,7 +57,7 @@ public class EWC2
      *               <li><b>Algorithms:</b> Route to an XML file containing the recommender configurations. Must include configurations for BM25.</li>
      *               <li><b>Output directory:</b> Directory in which to store the recommendations and the output file.</li>
      *               <li><b>Directed:</b> True if the network is directed, false otherwise.</li>
-     *               <li><b>Max. Length:</b> Maximum number of recommendations per user.</li>
+     *               <li><b>Rec. Length:</b> Maximum number of recommendations per user.</li>
      *               <li><b>Print recommendations:</b> True if, additionally to the results, you want to print the recommendations. False otherwise</li>
      *             </ol>
      */
@@ -118,6 +118,7 @@ public class EWC2
         testData = GraphSimpleFastPreferenceData.load(testGraph);
         GraphIndex<Long> index = new FastGraphIndex<>(graph);
 
+        int numUsers = testData.numUsersWithPreferences();
         // Read the XML containing the parameter grid for each algorithm
         AlgorithmGridReader gridreader = new AlgorithmGridReader(algorithmsPath);
         gridreader.readDocument();
@@ -174,13 +175,13 @@ public class EWC2
                 // Execute and evaluate the recommenders
                 if(printRecs)
                 {
-                    bm25value = AuxiliarMethods.computeAndEvaluate(outputPath + "bm25" + File.separator + bm25name + ".txt", bm25, runner, nDCG);
-                    ebm25value = AuxiliarMethods.computeAndEvaluate(outputPath + "ebm25" + File.separator + ebm25name + ".txt", ebm25, runner, nDCG);
+                    bm25value = AuxiliarMethods.computeAndEvaluate(outputPath + "bm25" + File.separator + bm25name + ".txt", bm25, runner, nDCG, numUsers);
+                    ebm25value = AuxiliarMethods.computeAndEvaluate(outputPath + "ebm25" + File.separator + ebm25name + ".txt", ebm25, runner, nDCG, numUsers);
                 }
                 else
                 {
-                    bm25value = AuxiliarMethods.computeAndEvaluate(bm25, runner, nDCG);
-                    ebm25value = AuxiliarMethods.computeAndEvaluate(ebm25, runner, nDCG);
+                    bm25value = AuxiliarMethods.computeAndEvaluate(bm25, runner, nDCG, numUsers);
+                    ebm25value = AuxiliarMethods.computeAndEvaluate(ebm25, runner, nDCG, numUsers);
                 }
 
                 // Store the accuracy values.

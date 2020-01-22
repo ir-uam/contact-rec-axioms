@@ -181,6 +181,8 @@ public class EWC1
             RecommendationFormat<Long, Long> format = new TRECRecommendationFormat<>(lp, lp);
             @SuppressWarnings("unchecked") Function<Long, IntPredicate> filter = FastFilters.and(FastFilters.notInTrain(trainData), FastFilters.notSelf(index), SocialFastFilters.notReciprocal(graph, index));
             RecommenderRunner<Long, Long> runner = new FastFilterRecommenderRunner<>(index, index, targetUsers.stream(), filter, maxLength);
+            int numUsers = testData.numUsersWithPreferences();
+
             // Execute the recommendations
             recMap.entrySet().parallelStream().forEach(entry ->
             {
@@ -206,11 +208,11 @@ public class EWC1
                 {
                     if (printRecommenders)
                     {
-                        value = AuxiliarMethods.computeAndEvaluate(path, rec, runner, nDCG);
+                        value = AuxiliarMethods.computeAndEvaluate(path, rec, runner, nDCG, numUsers);
                     }
                     else
                     {
-                        value = AuxiliarMethods.computeAndEvaluate(rec, runner, nDCG);
+                        value = AuxiliarMethods.computeAndEvaluate(rec, runner, nDCG, numUsers);
                     }
 
                     if (weighted)

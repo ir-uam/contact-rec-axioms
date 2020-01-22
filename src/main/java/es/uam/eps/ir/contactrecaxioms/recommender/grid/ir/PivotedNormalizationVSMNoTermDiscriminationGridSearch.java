@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import static es.uam.eps.ir.contactrecaxioms.recommender.grid.AlgorithmIdentifiers.PIVOTEDNOTD;
+
 public class PivotedNormalizationVSMNoTermDiscriminationGridSearch<U> implements AlgorithmGridSearch<U>
 {
     /**
@@ -38,7 +40,6 @@ public class PivotedNormalizationVSMNoTermDiscriminationGridSearch<U> implements
      * Identifier for the orientation of the target user neighborhood
      */
     private static final String VSEL = "vSel";
-    private String PIVOTEDNOTD;
 
     @Override
     public Map<String, Supplier<Recommender<U, U>>> grid(Grid grid, FastGraph<U> graph, FastPreferenceData<U, U> prefData)
