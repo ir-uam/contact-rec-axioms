@@ -61,19 +61,20 @@ a different neighborhood for the length.
 - nDCG@k
 - AUC
 
-
 ## System Requirements
 
 ## Installation
 
 ## Execution
-The descriptions for the different programs is included in the Wiki for this project. We include here the links to the descriptions. 
+The descriptions for the different programs is included in the Wiki for this project. We include here the links to the descriptions of each program. 
 
 * [EWC1](https://github.com/ir-uam/contact-rec-axioms/wiki/EWC1)
 * [EWC2](https://github.com/ir-uam/contact-rec-axioms/wiki/EWC2)
 * [EWC3](https://github.com/ir-uam/contact-rec-axioms/wiki/EWC3)
 * [NDC](https://github.com/ir-uam/contact-rec-axioms/wiki/NDC)
 * [CLNCS](https://github.com/ir-uam/contact-rec-axioms/wiki/CLNCS)
+* [Degree](https://github.com/ir-uam/contact-rec-axioms/wiki/degree)
+* [Validation](https://github.com/ir-uam/contact-rec-axioms/wiki/Validation)
 
 ## References
 [1] Sanz-Cruzado, J., Castells, P.  Information Retrieval Models for Contact Recommendation in Social Networks. 
