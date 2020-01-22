@@ -118,13 +118,7 @@ The third program, EWC3, sorts the users at two steps from the target user, and 
 over the different users that, at least, have one connection in the test set to the selected candidate users (for the rest, the AUC metric cannot be computed).
 This program can be used to generate Table 5.
 
-For directed graphs, candidate users are selected according to the orientation selection for the target and candidate users. For directed graphs, although the program
-finds the AUC metric for all possible orientation selections:
-
-<img src="https://latex.codecogs.com/gif.latex?\Gamma^q(u)\in%20\{\Gamma_{in}(u),\Gamma_{out}(u),\Gamma_{und}(u)\}" />
-<img src="https://latex.codecogs.com/gif.latex?\Gamma^d(v)\in%20\{\Gamma_{in}(v),\Gamma_{out}(v),\Gamma_{und}(v)\}" />
-
-only the value for taking the undirected neighborhood of the target users <img src="https://latex.codecogs.com/gif.latex?u" /> (`UND`, <img src="https://latex.codecogs.com/gif.latex?\Gamma^q(u)=\Gamma_{und}(u)" />)
+For directed graphs, candidate users are selected according to the orientation selection for the target and candidate users. For directed graphs, although the programfinds the AUC metric for all possible orientation selections,only the value for taking the undirected neighborhood of the target users <img src="https://latex.codecogs.com/gif.latex?u" /> (`UND`, <img src="https://latex.codecogs.com/gif.latex?\Gamma^q(u)=\Gamma_{und}(u)" />)
 and the incoming one for the candidate ones <img src="https://latex.codecogs.com/gif.latex?v" />  (`IN`, <img src="https://latex.codecogs.com/gif.latex?\Gamma^d(v)=\Gamma_{in}(v)" />) was
 included in Table 5.
 
