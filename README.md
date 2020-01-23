@@ -15,6 +15,14 @@ Terrier Group at University of Glasgow
 ## Software description
 This repository contains all the needed classes to reproduce the experiments explained in the paper. The software contains the following packages:
 
+- `es.uam.eps.ir.contactrecaxioms.data`: Classes for handling the ratings by users for items. Extension of the RankSys preference data that use graphs.
+- `es.uam.eps.ir.contactrecaxioms.graph`: Classes for handling network data.
+- `es.uam.eps.ir.contactrecaxioms.main`: Main programs.
+- `es.uam.eps.ir.contactrecaxioms.metrics`: Classes implementing the metrics used in the experiments which are not provided by RankSys.
+- `es.uam.eps.ir.contactrecaxioms.recommenders`: Implementation of recommendation algorithms and similarities.
+- `es.uam.eps.ir.contactrecaxioms.terrier`: Classes for applying recommenders based on the Terrier IR platform.
+- `es.uam.eps.ir.contactrecaxioms.utils`: Additional classes, useful for the rest of the program.
+
 ### Algorithms
 The software includes the implementation of several contact recommendation approaches which are used in our experiments.
 
@@ -56,10 +64,6 @@ a different neighborhood for the length.
 | QLL | <img src="https://latex.codecogs.com/gif.latex?\gamma%20\in%20\{%200.001,0.01,0.1,1,10,100,1000%20\}" /> |
 | PL2 | <img src="https://latex.codecogs.com/gif.latex?c%20\in%20\{%200.001,0.01,0.1,1,10,100,1000%20\}" /> |
 | Pivoted normalization |  <img src="https://latex.codecogs.com/gif.latex?s%20\in%20\{%200.1,0.2,0.3,...,0.8,0.9,0.999,1.0%20\}" /> |
-
-### Metrics
-- nDCG@k
-- AUC
 
 ## System Requirements
 **Java JDK:** 1.8 or above.
