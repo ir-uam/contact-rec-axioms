@@ -62,8 +62,20 @@ a different neighborhood for the length.
 - AUC
 
 ## System Requirements
+**Java JDK:** 1.8 or above.
+**Maven:** tested with version 3.6.0.
 
 ## Installation
+In order to install this program, you need to have Maven (https://maven.apache.org) installed on your system. Then, download the files into a directory, and execute the following command:
+```
+mvn compile assembly::single
+```
+If you do not want to use Maven, it is still possible to compile the code using any Java compiler. In that case, you will need the following libraries:
+- Ranksys version 0.4.3: http://ranksys.org
+- Colt version 1.2.0: https://dst.lbl.gov/ACSSoftware/colt
+- Google MTJ version 1.0.4: https://github.com/fommil/matrix-toolkits-java
+- Terrier version 5.1: http://terrier.org/
+- FastUtil version 8.3.0: http://fastutil.di.unimi.it/
 
 ## Execution
 The descriptions for the different programs is included in the Wiki for this project. We include here the links to the descriptions of each program. 
