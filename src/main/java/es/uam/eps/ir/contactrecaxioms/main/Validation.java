@@ -57,7 +57,7 @@ public class Validation
      * @param args Execution arguments:
      *             <ol>
      *               <li><b>Train:</b> Route to the file containing the training graph.</li>
-     *               <li><b>Test:</b> Route to the file containing the test links.</li>
+     *               <li><b>Validation:</b> Route to the file containing the validation links.</li>
      *               <li><b>Algorithms:</b> Route to an XML file containing the recommender configurations</li>
      *               <li><b>Output directory:</b> Directory in which to store the recommendations and the output file.</li>
      *               <li><b>Directed:</b> True if the network is directed, false otherwise.</li>
@@ -73,7 +73,7 @@ public class Validation
             System.err.println("Invalid arguments.");
             System.err.println("Usage:");
             System.err.println("\tTrain: Route to the file containing the training graph.");
-            System.err.println("\tTest: Route to the file containing the test links.");
+            System.err.println("\tValidation: Route to the file containing the validation links.");
             System.err.println("\tAlgorithms: Route to an XML file containing the recommender configuration. Only algorithms with a version without term discrimination will be executed.");
             System.err.println("\tOutput directory: Directory in which to store the recommendations and the output files.");
             System.err.println("\tDirected: True if the network is directed, false otherwise.");
@@ -85,7 +85,7 @@ public class Validation
 
         // Read the program arguments.
         String trainDataPath = args[0];
-        String testDataPath = args[1];
+        String validationDataPath = args[1];
         String algorithmsPath = args[2];
         String outputPath = args[3];
         boolean directed = args[4].equalsIgnoreCase("true");
@@ -112,9 +112,9 @@ public class Validation
         }
 
         // Read the test graph.
-        Graph<Long> auxgraph = unweightedReader.read(testDataPath, false, false);
-        FastGraph<Long> testGraph = (FastGraph<Long>) Adapters.onlyTrainUsers(auxgraph, unweightedGraph);
-        if (testGraph == null)
+        Graph<Long> auxgraph = unweightedReader.read(validationDataPath, false, false);
+        FastGraph<Long> validationGraph = (FastGraph<Long>) Adapters.onlyTrainUsers(auxgraph, unweightedGraph);
+        if (validationGraph == null)
         {
             System.err.println("ERROR: Could not remove users from the test graph");
             return;
@@ -127,8 +127,8 @@ public class Validation
         FastPreferenceData<Long, Long> unweightedTrainData = GraphSimpleFastPreferenceData.load(unweightedGraph);
         FastPreferenceData<Long, Long> weightedTrainData = GraphSimpleFastPreferenceData.load(weightedGraph);
 
-        FastPreferenceData<Long, Long> testData;
-        testData = GraphSimpleFastPreferenceData.load(testGraph);
+        FastPreferenceData<Long, Long> validationData;
+        validationData = GraphSimpleFastPreferenceData.load(validationGraph);
         GraphIndex<Long> index = new FastGraphIndex<>(unweightedGraph);
 
         // Read the XML containing the parameter grid for each algorithm
@@ -137,7 +137,7 @@ public class Validation
 
         Set<String> algorithms = gridreader.getAlgorithms();
 
-        int numUsers = testData.numUsersWithPreferences();
+        int numUsers = validationData.numUsersWithPreferences();
 
         // For each algorithm.
         algorithms.forEach(algorithm ->
@@ -158,7 +158,7 @@ public class Validation
             // Configure the recommender runner
             @SuppressWarnings("unchecked")
             Function<Long, IntPredicate> filter = FastFilters.and(FastFilters.notInTrain(unweightedTrainData), FastFilters.notSelf(index), SocialFastFilters.notReciprocal(unweightedGraph, index));
-            RecommenderRunner<Long, Long> runner = new FastFilterRecommenderRunner<>(index, index, testData.getUsersWithPreferences(), filter, maxLength);
+            RecommenderRunner<Long, Long> runner = new FastFilterRecommenderRunner<>(index, index, validationData.getUsersWithPreferences(), filter, maxLength);
 
             AtomicInteger counter = new AtomicInteger(0);
             List<Parameters> configurations = confs.getConfigurations();
@@ -173,7 +173,7 @@ public class Validation
                 String algorithmName = algSupp.v1();
 
                 // First, obtain the metric.
-                NDCG.NDCGRelevanceModel<Long, Long> ndcgModel = new NDCG.NDCGRelevanceModel<>(false, testData, 0.5);
+                NDCG.NDCGRelevanceModel<Long, Long> ndcgModel = new NDCG.NDCGRelevanceModel<>(false, validationData, 0.5);
                 SystemMetric<Long, Long> nDCG = new AverageRecommendationMetric<>(new NDCG<>(maxLength, ndcgModel), numUsers);
 
                 try
