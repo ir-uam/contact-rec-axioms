@@ -32,8 +32,10 @@ import org.ranksys.formats.parsing.Parsers;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 
@@ -146,6 +148,7 @@ public class CLNCS
 
         algorithms.forEach(lenNormIdentifier ->
         {
+            long timeaa = System.currentTimeMillis();
             String noLenNormIdentifier = CLNCS.getNoLengthNormalizationVersion(lenNormIdentifier);
 
             Map<String, Double> lenNormValues = new HashMap<>();
@@ -154,12 +157,15 @@ public class CLNCS
             if (noLenNormIdentifier != null) // If it exists
             {
                 System.out.println("-------- Starting algorithm " + lenNormIdentifier + " --------");
-                long timeaa = System.currentTimeMillis();
                 Grid grid = gridreader.getGrid(lenNormIdentifier);
                 Configurations confs = grid.getConfigurations();
                 AlgorithmGridSelector<Long> algorithmSelector = new AlgorithmGridSelector<>();
 
-                confs.getConfigurations().forEach(parameters ->
+                AtomicInteger counter = new AtomicInteger(0);
+                List<Parameters> configurations = confs.getConfigurations();
+                int totalCount = configurations.size();
+
+                configurations.forEach(parameters ->
                 {
                     Tuple2oo<String, RecommendationAlgorithmFunction<Long>> lenNormSupp = algorithmSelector.getRecommender(lenNormIdentifier, parameters);
                     Tuple2oo<String, RecommendationAlgorithmFunction<Long>> noLenNormSupp = algorithmSelector.getRecommender(noLenNormIdentifier, parameters);
@@ -168,7 +174,7 @@ public class CLNCS
 
                     // First, obtain the metric.
                     NDCG.NDCGRelevanceModel<Long, Long> ndcgModel = new NDCG.NDCGRelevanceModel<>(false, testData, 0.5);
-                    SystemMetric<Long, Long> nDCG = new AverageRecommendationMetric<>(new NDCG<>(maxLength, ndcgModel), true);
+                    SystemMetric<Long, Long> nDCG = new AverageRecommendationMetric<>(new NDCG<>(maxLength, ndcgModel), numUsers);
 
                     @SuppressWarnings("unchecked") Function<Long, IntPredicate> filter = FastFilters.and(FastFilters.notInTrain(unweightedTrainData), FastFilters.notSelf(index), SocialFastFilters.notReciprocal(unweightedGraph, index));
                     RecommenderRunner<Long, Long> runner = new FastFilterRecommenderRunner<>(index, index, testData.getUsersWithPreferences(), filter, maxLength);
@@ -220,7 +226,7 @@ public class CLNCS
                         }
 
                         long timebb = System.currentTimeMillis();
-                        System.out.println("Algorithm " + lenNormName + " finished (" + (timebb-timeaa) + " ms.)");
+                        System.out.println("Algorithm " + counter.incrementAndGet() + "/" + totalCount + ": " + lenNormName + " finished (" + (timebb-timeaa) + " ms.)");
                     }
                     catch (IOException ioe)
                     {
@@ -230,13 +236,14 @@ public class CLNCS
 
                 // Print the file for this algorithm.
                 AuxiliarMethods.printFile(outputPath + "clncs_" + lenNormIdentifier + ".txt", lenNormValues, noLenNormValues, "Len. Norm.", "No Len. Norm.", maxLength);
-                long timecc = System.currentTimeMillis();
-                System.out.println("-------- Finished algorithm " + lenNormIdentifier + " (" + (timecc-timeaa) + " ms.) --------");
             }
             else
             {
                 System.err.println("Algorithm " + lenNormIdentifier + " has no version without term discrimination");
             }
+
+            long timecc = System.currentTimeMillis();
+            System.out.println("-------- Finished algorithm " + lenNormIdentifier + " (" + (timecc-timeaa) + " ms.) --------");
         });
 
 

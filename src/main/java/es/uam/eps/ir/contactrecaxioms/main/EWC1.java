@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Supplier;
@@ -183,24 +184,23 @@ public class EWC1
             RecommenderRunner<Long, Long> runner = new FastFilterRecommenderRunner<>(index, index, targetUsers.stream(), filter, maxLength);
             int numUsers = testData.numUsersWithPreferences();
 
+            AtomicInteger counter = new AtomicInteger(0);
+            int totalCount = recMap.size();
             // Execute the recommendations
             recMap.entrySet().parallelStream().forEach(entry ->
             {
+                long a = System.currentTimeMillis();
                 String name = entry.getKey();
 
                 String path = outputPath + File.separator + (weighted ? "weighted" : "unweighted") + File.separator + name + ".txt";
 
                 // First, create the nDCG metric (for measuring accuracy)
                 NDCG.NDCGRelevanceModel<Long, Long> ndcgModel = new NDCG.NDCGRelevanceModel<>(false, testData, 0.5);
-                SystemMetric<Long, Long> nDCG = new AverageRecommendationMetric<>(new NDCG<>(maxLength, ndcgModel), true);
+                SystemMetric<Long, Long> nDCG = new AverageRecommendationMetric<>(new NDCG<>(maxLength, ndcgModel), numUsers);
 
                 // Prepare the recommender
-                System.out.println("Preparing " + name);
                 Supplier<Recommender<Long, Long>> recomm = entry.getValue();
-                long a = System.currentTimeMillis();
                 Recommender<Long, Long> rec = recomm.get();
-                long b = System.currentTimeMillis();
-                System.out.println("Prepared " + name + " (" + (b - a) + " ms.)");
 
                 // Obtain the nDCG value
                 double value;
@@ -228,6 +228,9 @@ public class EWC1
                 {
                     System.err.println("Algorithm " + name + " failed");
                 }
+
+                long b = System.currentTimeMillis();
+                System.err.println("Algorithm " + counter.incrementAndGet() + "/" + totalCount + ": " + name + " finished (" + (b-a) + " ms.)");
             });
         }
 

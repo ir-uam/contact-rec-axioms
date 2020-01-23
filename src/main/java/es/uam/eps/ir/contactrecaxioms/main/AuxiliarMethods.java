@@ -65,10 +65,14 @@ public class AuxiliarMethods
         reader = format.getReader(output);
         int totalrecs = reader.readAll().mapToInt(rec ->
         {
-            metric.add(rec);
-            return 1;
+            if(rec != null && rec.getItems() != null && !rec.getItems().isEmpty())
+            {
+                metric.add(rec);
+                return 1;
+            }
+            return 0;
         }).sum();
-        return metric.evaluate()*(totalrecs+0.0)/(numUsers+0.0);
+        return metric.evaluate();
     }
 
     /**
@@ -86,13 +90,15 @@ public class AuxiliarMethods
         runner.run(recommender, writer);
 
         metric.reset();
-        int totalrecs = writer.readAll().mapToInt(rec ->
+        writer.readAll().forEach(rec ->
         {
-            metric.add(rec);
-            return 1;
-        }).sum();
+            if(rec != null && rec.getItems() != null && !rec.getItems().isEmpty())
+            {
+                metric.add(rec);
+            }
+        });
 
-        return metric.evaluate()*(totalrecs+0.0)/(numUsers+0.0);
+        return metric.evaluate();
     }
 
     /**

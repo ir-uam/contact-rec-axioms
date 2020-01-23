@@ -53,11 +53,6 @@ public class PivotedNormalizationVSMNoTermDiscrimination<U> extends UserFastRank
     private final Int2DoubleMap lengths;
 
     /**
-     * Term discrimination values.
-     */
-    private final Int2DoubleMap idfs;
-
-    /**
      * Constructor.
      *
      * @param graph the training network.
@@ -74,15 +69,9 @@ public class PivotedNormalizationVSMNoTermDiscrimination<U> extends UserFastRank
         this.s = s;
 
         this.lengths = new Int2DoubleOpenHashMap();
-        this.idfs = new Int2DoubleOpenHashMap();
-
-        long numUsers = graph.getVertexCount();
 
         OptionalDouble opt = this.getAllUidx().mapToDouble(vidx ->
         {
-            double idf = graph.getNeighborhood(vidx, this.vSel).count();
-            idf = (numUsers + 1.0) / (idf);
-            this.idfs.put(vidx, idf);
             // User length.
             double len = graph.getNeighborhoodWeights(vidx, vSel).mapToDouble(widx -> widx.v2).sum();
             this.lengths.put(vidx, len);

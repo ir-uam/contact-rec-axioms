@@ -32,7 +32,9 @@ import org.ranksys.formats.parsing.Parsers;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 
@@ -146,8 +148,12 @@ public class EWC2
             file.mkdir();
         }
 
+        List<Parameters> configurations = confs.getConfigurations();
+        int totalCount = configurations.size();
+        AtomicInteger counter = new AtomicInteger(0);
+
         // For each configuration, execute the BM25/EBM25 pair, and store its values.
-        confs.getConfigurations().parallelStream().forEach(parameters ->
+        configurations.parallelStream().forEach(parameters ->
         {
             long timeaa = System.currentTimeMillis();
             // First, select the algorithms.
@@ -158,7 +164,7 @@ public class EWC2
 
             // Configure the nDCG metric.
             NDCG.NDCGRelevanceModel<Long, Long> ndcgModel = new NDCG.NDCGRelevanceModel<>(false, testData, 0.5);
-            SystemMetric<Long, Long> nDCG = new AverageRecommendationMetric<>(new NDCG<>(maxLength, ndcgModel), true);
+            SystemMetric<Long, Long> nDCG = new AverageRecommendationMetric<>(new NDCG<>(maxLength, ndcgModel), numUsers);
 
             // Configure the recommender runner.
             @SuppressWarnings("unchecked")
@@ -194,7 +200,7 @@ public class EWC2
             }
 
             long timebb = System.currentTimeMillis();
-            System.out.println("Executed variant " + bm25name + " (" + (timebb-timeaa) + " ms.)");
+            System.out.println("Algorithm " + counter.incrementAndGet() + "/" + totalCount + ": " + bm25name + " (" + (timebb-timeaa) + " ms.)");
         });
 
         // Print the output file.

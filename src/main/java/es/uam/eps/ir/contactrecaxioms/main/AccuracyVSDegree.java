@@ -154,6 +154,7 @@ public class AccuracyVSDegree
 
         // Select the set of users to be recommended, the format, and the filters to apply to the recommendation
         Set<Long> targetUsers = testData.getUsersWithPreferences().collect(Collectors.toCollection(HashSet::new));
+        int numUsers = targetUsers.size();
 
         System.out.println("Num. target users: " + targetUsers.size());
         RecommendationFormat<Long, Long> format = new TRECRecommendationFormat<>(lp, lp);
@@ -170,17 +171,17 @@ public class AccuracyVSDegree
 
             // First, obtain the accuracy metric.
             NDCG.NDCGRelevanceModel<Long, Long> ndcgModel = new NDCG.NDCGRelevanceModel<>(false, testData, 0.5);
-            SystemMetric<Long, Long> nDCG = new AverageRecommendationMetric<>(new NDCG<>(maxLength, ndcgModel), true);
+            SystemMetric<Long, Long> nDCG = new AverageRecommendationMetric<>(new NDCG<>(maxLength, ndcgModel), numUsers);
 
             // Then, the average degree metrics.
             RelevanceModel<Long, Long> noRel = new NoRelevanceModel<>();
             RankingDiscountModel noDisc = new NoDiscountModel();
             UserLengthNovelty<Long> inNovelty = new UserLengthNovelty<>(trainData, EdgeOrientation.IN);
-            SystemMetric<Long, Long> inDegree = new AverageRecommendationMetric<>(new UserLength<>(maxLength, inNovelty, noRel, noDisc), true);
+            SystemMetric<Long, Long> inDegree = new AverageRecommendationMetric<>(new UserLength<>(maxLength, inNovelty, noRel, noDisc), numUsers);
             UserLengthNovelty<Long> outNovelty = new UserLengthNovelty<>(trainData, EdgeOrientation.OUT);
-            SystemMetric<Long, Long> outDegree = new AverageRecommendationMetric<>(new UserLength<>(maxLength, outNovelty, noRel, noDisc), true);
+            SystemMetric<Long, Long> outDegree = new AverageRecommendationMetric<>(new UserLength<>(maxLength, outNovelty, noRel, noDisc), numUsers);
             UserLengthNovelty<Long> undNovelty = new UserLengthNovelty<>(trainData, EdgeOrientation.UND);
-            SystemMetric<Long, Long> degree = new AverageRecommendationMetric<>(new UserLength<>(maxLength, undNovelty, noRel, noDisc), true);
+            SystemMetric<Long, Long> degree = new AverageRecommendationMetric<>(new UserLength<>(maxLength, undNovelty, noRel, noDisc), numUsers);
 
             // Prepare the recommender
             Recommender<Long, Long> rec = recomm.get();

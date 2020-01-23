@@ -65,25 +65,25 @@ public class Main
             switch (main)
             {
                 case EWC1:
-                    className = "es.uam.eps.ir.contactrecaxiom.main.EWC1";
+                    className = "es.uam.eps.ir.contactrecaxioms.main.EWC1";
                     break;
                 case EWC2:
-                    className = "es.uam.eps.ir.contactrecaxiom.main.EWC2";
+                    className = "es.uam.eps.ir.contactrecaxioms.main.EWC2";
                     break;
                 case EWC3:
-                    className = "es.uam.eps.ir.contactrecaxiom.main.EWC3";
+                    className = "es.uam.eps.ir.contactrecaxioms.main.EWC3";
                     break;
                 case NDC:
-                    className = "es.uam.eps.ir.contactrecaxiom.main.NDC";
+                    className = "es.uam.eps.ir.contactrecaxioms.main.NDC";
                     break;
                 case CLNCS:
-                    className = "es.uam.eps.ir.contactrecaxiom.main.CLNCS";
+                    className = "es.uam.eps.ir.contactrecaxioms.main.CLNCS";
                     break;
                 case DEGREE:
-                    className = "es.uam.eps.ir.contactrecaxiom.main.AccuracyVSDegree";
+                    className = "es.uam.eps.ir.contactrecaxioms.main.AccuracyVSDegree";
                     break;
                 case VALID:
-                    className = "es.uam.eps.ir.contactrecaxiom.main.Validation";
+                    className = "es.uam.eps.ir.contactrecaxioms.main.Validation";
                     break;
                 default:
                     System.err.println("ERROR: Unknown program.");

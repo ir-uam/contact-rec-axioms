@@ -37,10 +37,6 @@ public class QLDNoTermDiscrimination<U> extends UserFastRankingRecommender<U>
      */
     private final double mu;
     /**
-     * For each user, computes the proportion of neighbors it has, in comparison with the sum of all neighborhood sizes.
-     */
-    private final Int2DoubleMap pc;
-    /**
      * Neighborhood sizes for the target user
      */
     private final Int2DoubleMap uSize;
@@ -48,10 +44,6 @@ public class QLDNoTermDiscrimination<U> extends UserFastRankingRecommender<U>
      * Neighborhood sizes for the candidate user
      */
     private final Int2DoubleMap vSize;
-    /**
-     * Sum of the neighborhood sizes
-     */
-    private final double fullSize;
     /**
      * Neighborhood selection for the target users.
      */
@@ -78,71 +70,56 @@ public class QLDNoTermDiscrimination<U> extends UserFastRankingRecommender<U>
         this.mu = mu;
         this.uSize = new Int2DoubleOpenHashMap();
 
-        EdgeOrientation wSel = vSel.invertSelection();
         if (!graph.isDirected() || (uSel.equals(vSel) && uSel.equals(EdgeOrientation.UND))) // Cases UND-UND
         {
-            this.fullSize = this.getAllUidx().mapToDouble(vidx ->
+            this.getAllUidx().forEach(vidx ->
             {
                 double uS = graph.getNeighborhoodWeights(vidx, uSel).mapToDouble(Tuple2id::v2).sum();
                 this.uSize.put(vidx, uS);
-                return uS;
-            }).sum();
+            });
             this.vSize = uSize;
-            this.pc = uSize;
         }
         else if (uSel.equals(vSel)) //CASES IN-IN,OUT-OUT
         {
-            this.pc = new Int2DoubleOpenHashMap();
-            this.fullSize = this.getAllUidx().mapToDouble(vidx ->
+            this.getAllUidx().forEach(vidx ->
             {
                 double uS = graph.getNeighborhoodWeights(vidx, uSel).mapToDouble(Tuple2id::v2).sum();
-                double wS = graph.getNeighborhoodWeights(vidx, wSel).mapToDouble(Tuple2id::v2).sum();
                 this.uSize.put(vidx, uS);
-                this.pc.put(vidx, wS);
-                return uS;
-            }).sum();
+            });
             this.vSize = uSize;
         }
         else if (uSel.equals(vSel.invertSelection())) // CASES IN-OUT,OUT-IN
         {
             this.vSize = new Int2DoubleOpenHashMap();
-            this.fullSize = this.getAllUidx().mapToDouble(vidx ->
+            this.getAllUidx().forEach(vidx ->
             {
                 double uS = graph.getNeighborhoodWeights(vidx, uSel).mapToDouble(Tuple2id::v2).sum();
                 double wS = graph.getNeighborhoodWeights(vidx, vSel).mapToDouble(Tuple2id::v2).sum();
                 this.uSize.put(vidx, uS);
                 this.vSize.put(vidx, wS);
-                return uS;
-            }).sum();
-            this.pc = uSize;
+            });
         }
         else if (vSel.equals(EdgeOrientation.UND)) // CASES IN-UND, OUT-UND
         {
             this.vSize = new Int2DoubleOpenHashMap();
-            this.fullSize = this.getAllUidx().mapToDouble(vidx ->
+            this.getAllUidx().forEach(vidx ->
             {
                 double uS = graph.getNeighborhoodWeights(vidx, uSel).mapToDouble(Tuple2id::v2).sum();
                 double vS = graph.getNeighborhoodWeights(vidx, vSel).mapToDouble(Tuple2id::v2).sum();
                 this.uSize.put(vidx, uS);
                 this.vSize.put(vidx, vS);
-                return uS;
-            }).sum();
-            this.pc = vSize;
+            });
         }
         else // CASES UND-IN, UND-OUT
         {
             this.vSize = new Int2DoubleOpenHashMap();
-            this.pc = new Int2DoubleOpenHashMap();
-            this.fullSize = this.getAllUidx().mapToDouble(vidx ->
+            this.getAllUidx().forEach(vidx ->
             {
                 double uS = graph.getNeighborhoodWeights(vidx, uSel).mapToDouble(Tuple2id::v2).sum();
                 double vS = graph.getNeighborhoodWeights(vidx, vSel).mapToDouble(Tuple2id::v2).sum();
-                double wS = uS - vS; // Considering that weight(UND,x,y) = weight(x,y) + weight(y,x)
                 this.uSize.put(vidx, uS);
                 this.vSize.put(vidx, vS);
-                this.pc.put(vidx, wS);
-                return uS;
-            }).sum();
+            });
         }
     }
 

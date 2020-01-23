@@ -62,8 +62,6 @@ public class BM25NoTermDiscrimination<U> extends UserFastRankingRecommender<U>
      */
     private final Int2DoubleOpenHashMap size;
 
-    private final Int2DoubleOpenHashMap wLengths;
-
     /**
      * Constructor.
      *
@@ -82,7 +80,6 @@ public class BM25NoTermDiscrimination<U> extends UserFastRankingRecommender<U>
         this.b = b;
         this.k = k;
         this.size = new Int2DoubleOpenHashMap();
-        this.wLengths = new Int2DoubleOpenHashMap();
         this.numUsers = graph.getVertexCount();
 
         this.uSel = uSel;
@@ -90,10 +87,6 @@ public class BM25NoTermDiscrimination<U> extends UserFastRankingRecommender<U>
 
         OptionalDouble opt = this.getAllUidx().mapToDouble(vidx ->
         {
-            // Compute RSJ
-            double rsjV = graph.getNeighborhood(vidx, this.vSel).count();
-            this.wLengths.put(vidx, rsjV);
-
             // Compute size
             double val = graph.getNeighborhoodWeights(vidx, dlSel).mapToDouble(widx -> widx.v2).sum();
 

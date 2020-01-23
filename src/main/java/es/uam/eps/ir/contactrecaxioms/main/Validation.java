@@ -17,8 +17,9 @@ import es.uam.eps.ir.contactrecaxioms.graph.io.TextGraphReader;
 import es.uam.eps.ir.contactrecaxioms.recommender.FastGraphIndex;
 import es.uam.eps.ir.contactrecaxioms.recommender.GraphIndex;
 import es.uam.eps.ir.contactrecaxioms.recommender.SocialFastFilters;
-import es.uam.eps.ir.contactrecaxioms.recommender.grid.AlgorithmGridReader;
-import es.uam.eps.ir.contactrecaxioms.recommender.grid.AlgorithmGridSelector;
+import es.uam.eps.ir.contactrecaxioms.recommender.basic.Random;
+import es.uam.eps.ir.contactrecaxioms.recommender.grid.*;
+import es.uam.eps.ir.contactrecaxioms.utils.Tuple2oo;
 import es.uam.eps.ir.ranksys.fast.preference.FastPreferenceData;
 import es.uam.eps.ir.ranksys.metrics.SystemMetric;
 import es.uam.eps.ir.ranksys.metrics.basic.AverageRecommendationMetric;
@@ -31,11 +32,9 @@ import org.ranksys.core.util.tuples.Tuple2od;
 import org.ranksys.formats.parsing.Parsers;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Supplier;
@@ -69,18 +68,19 @@ public class Validation
      */
     public static void main(String[] args)
     {
-        if (args.length < 8)
+        if (args.length < 7)
         {
             System.err.println("Invalid arguments.");
             System.err.println("Usage:");
             System.err.println("\tTrain: Route to the file containing the training graph.");
             System.err.println("\tTest: Route to the file containing the test links.");
-            System.err.println("\tAlgorithms: Route to an XML file containing the recommender configurations.");
-            System.err.println("\tOutput directory: Directory in which to store the outcome of the program.");
+            System.err.println("\tAlgorithms: Route to an XML file containing the recommender configuration. Only algorithms with a version without term discrimination will be executed.");
+            System.err.println("\tOutput directory: Directory in which to store the recommendations and the output files.");
             System.err.println("\tDirected: True if the network is directed, false otherwise.");
             System.err.println("\tWeighted: True if the network is weighted, false otherwise.");
-            System.err.println("\tMax. Length:  Maximum number of recommendations per user.");
-            System.err.println("\tPrint recommendations: True if, additionally to the validation results, you want to store the recommendations. False otherwise.");
+            System.err.println("\tRec. Length: Maximum number of recommendations per user.");
+            System.err.println("\tPrint recommendations: True if, additionally to the results, you want to print the recommendations. False otherwise");
+            return;
         }
 
         // Read the program arguments.
@@ -91,135 +91,162 @@ public class Validation
         boolean directed = args[4].equalsIgnoreCase("true");
         boolean weighted = args[5].equalsIgnoreCase("true");
         int maxLength = Parsers.ip.parse(args[6]);
-        boolean printRecommendations = args[7].equalsIgnoreCase("true");
+        boolean printRecs = args[7].equalsIgnoreCase("true");
 
-        // Read the graph.
         long timea = System.currentTimeMillis();
         // Read the training graph.
-        TextGraphReader<Long> greader = new TextGraphReader<>(directed, weighted, false, "\t", Parsers.lp);
-        FastGraph<Long> graph = (FastGraph<Long>) greader.read(trainDataPath, weighted, false);
-        if (graph == null)
+        TextGraphReader<Long> weightedReader = new TextGraphReader<>(directed, true, false,"\t", Parsers.lp);
+        FastGraph<Long> weightedGraph = (FastGraph<Long>) weightedReader.read(trainDataPath, true, false);
+        if (weightedGraph == null)
+        {
+            System.err.println("ERROR: Could not read the training graph");
+            return;
+        }
+
+        TextGraphReader<Long> unweightedReader = new TextGraphReader<>(directed, false, false, "\t", Parsers.lp);
+        FastGraph<Long> unweightedGraph = (FastGraph<Long>) unweightedReader.read(trainDataPath, false, false);
+        if (unweightedGraph == null)
         {
             System.err.println("ERROR: Could not read the training graph");
             return;
         }
 
         // Read the test graph.
-        Graph<Long> auxgraph = greader.read(testDataPath, false, false);
-        FastGraph<Long> testGraph = (FastGraph<Long>) Adapters.onlyTrainUsers(auxgraph, graph);
+        Graph<Long> auxgraph = unweightedReader.read(testDataPath, false, false);
+        FastGraph<Long> testGraph = (FastGraph<Long>) Adapters.onlyTrainUsers(auxgraph, unweightedGraph);
         if (testGraph == null)
         {
             System.err.println("ERROR: Could not remove users from the test graph");
             return;
         }
+
         long timeb = System.currentTimeMillis();
         System.out.println("Data read (" + (timeb - timea) + " ms.)");
 
-        // Create the training and test data
-        FastPreferenceData<Long, Long> trainData;
-        trainData = GraphSimpleFastPreferenceData.load(graph);
+        // Read the training and test data
+        FastPreferenceData<Long, Long> unweightedTrainData = GraphSimpleFastPreferenceData.load(unweightedGraph);
+        FastPreferenceData<Long, Long> weightedTrainData = GraphSimpleFastPreferenceData.load(weightedGraph);
 
         FastPreferenceData<Long, Long> testData;
         testData = GraphSimpleFastPreferenceData.load(testGraph);
-        GraphIndex<Long> index = new FastGraphIndex<>(graph);
+        GraphIndex<Long> index = new FastGraphIndex<>(unweightedGraph);
 
         // Read the XML containing the parameter grid for each algorithm
         AlgorithmGridReader gridreader = new AlgorithmGridReader(algorithmsPath);
         gridreader.readDocument();
 
-        // Obtain the set of algorithms, and prepare the basic elements for the recommendation.
         Set<String> algorithms = gridreader.getAlgorithms();
-        AlgorithmGridSelector<Long> ags = new AlgorithmGridSelector<>();
-        @SuppressWarnings("unchecked") Function<Long, IntPredicate> filter = FastFilters.and(FastFilters.notInTrain(trainData), FastFilters.notSelf(index), SocialFastFilters.notReciprocal(graph, index));
-        Set<Long> targetUsers = testData.getUsersWithPreferences().collect(Collectors.toCollection(HashSet::new));
+
         int numUsers = testData.numUsersWithPreferences();
 
-        System.out.println("Num. target users: " + targetUsers.size());
-
-        // For each algorithm, obtain the ranking of variants.
+        // For each algorithm.
         algorithms.forEach(algorithm ->
         {
-            System.out.println("Start algorithm " + algorithm);
-            long timeaa = System.currentTimeMillis();
-
-            // Obtain the different variants.
-            Map<String, Supplier<Recommender<Long, Long>>> recMap = new HashMap<>(ags.getRecommenders(algorithm, gridreader.getGrid(algorithm), graph, trainData));
-
-            long timebb = System.currentTimeMillis();
-            System.out.println("Identified " + recMap.size() + " variants of " + algorithm + "(" + (timebb - timeaa) + " ms.)");
-
-            // If we have to store the recommendations in disk, obtain the route and create the directory.
-            String route = outputPath + algorithm + File.pathSeparator;
-            if (printRecommendations)
+            String directory = outputPath + algorithm + File.separator;
+            if(printRecs)
             {
-                File dir = new File(route);
-                dir.mkdir();
+                File file = new File(directory);
+                file.mkdir();
             }
 
-            // Initialize the algorithm ranking
-            PriorityBlockingQueue<Tuple2od<String>> ranking = new PriorityBlockingQueue<>(recMap.size(), (x, y) -> Double.compare(y.v2, x.v2));
+            System.out.println("-------- Starting algorithm " + algorithm + " --------");
+            long timeaa = System.currentTimeMillis();
+            Grid grid = gridreader.getGrid(algorithm);
+            Configurations confs = grid.getConfigurations();
+            AlgorithmGridSelector<Long> algorithmSelector = new AlgorithmGridSelector<>();
 
-            // Execute each variant and obtain the evaluation value.
-            recMap.entrySet().parallelStream().forEach(entry ->
+            // Configure the recommender runner
+            @SuppressWarnings("unchecked")
+            Function<Long, IntPredicate> filter = FastFilters.and(FastFilters.notInTrain(unweightedTrainData), FastFilters.notSelf(index), SocialFastFilters.notReciprocal(unweightedGraph, index));
+            RecommenderRunner<Long, Long> runner = new FastFilterRecommenderRunner<>(index, index, testData.getUsersWithPreferences(), filter, maxLength);
+
+            AtomicInteger counter = new AtomicInteger(0);
+            List<Parameters> configurations = confs.getConfigurations();
+            int totalCount = configurations.size();
+
+            PriorityBlockingQueue<Tuple2od<String>> ranking = new PriorityBlockingQueue<>(totalCount, (x,y) -> Double.compare(y.v2, x.v2));
+
+            // Now, execute each possible variant.
+            configurations.parallelStream().forEach(parameters ->
             {
-                long timec;
-                // Obtain the name of the variant
-                String name = entry.getKey();
+                Tuple2oo<String, RecommendationAlgorithmFunction<Long>> algSupp = algorithmSelector.getRecommender(algorithm, parameters);
+                String algorithmName = algSupp.v1();
 
-                RecommenderRunner<Long, Long> runner = new FastFilterRecommenderRunner<>(index, index, targetUsers.stream(), filter, maxLength);
-                // First, obtain the accuracy metric (nDCG).
+                // First, obtain the metric.
                 NDCG.NDCGRelevanceModel<Long, Long> ndcgModel = new NDCG.NDCGRelevanceModel<>(false, testData, 0.5);
-                SystemMetric<Long, Long> nDCG = new AverageRecommendationMetric<>(new NDCG<>(maxLength, ndcgModel), true);
+                SystemMetric<Long, Long> nDCG = new AverageRecommendationMetric<>(new NDCG<>(maxLength, ndcgModel), numUsers);
 
-                // Initialize the recommender
-                Recommender<Long, Long> rec = entry.getValue().get();
-
-                timec = System.currentTimeMillis();
-                System.out.println("Initialized " + name + " (" + (timec - timeaa) + " ms.)");
-
-                // Execute it and obtain the nDCG value
-                double value;
                 try
                 {
-                    if (printRecommendations)
+                    Recommender<Long, Long> weightedAlg = new Random<>(unweightedGraph);
+                    Recommender<Long, Long> unweightedAlg = algSupp.v2().apply(unweightedGraph, unweightedTrainData);
+
+                    if(weighted)
                     {
-                        value = AuxiliarMethods.computeAndEvaluate(route + name + ".txt", rec, runner, nDCG, numUsers);
+                        weightedAlg = algSupp.v2().apply(weightedGraph, weightedTrainData);
+                    }
+
+                    double weightedValue = 0;
+                    double unweightedValue;
+
+                    if(printRecs) // If we want to print the recommendations
+                    {
+                        if(weighted)
+                        {
+                            weightedValue = AuxiliarMethods.computeAndEvaluate(directory + "wei_" + algorithmName + ".txt", weightedAlg, runner, nDCG, numUsers);
+                        }
+                        unweightedValue = AuxiliarMethods.computeAndEvaluate(directory + (weighted ? "unw_" : "") + algorithmName + ".txt", unweightedAlg, runner, nDCG, numUsers);
+                    }
+                    else // Otherwise
+                    {
+                        if(weighted)
+                        {
+                            weightedValue = AuxiliarMethods.computeAndEvaluate(weightedAlg, runner, nDCG, numUsers);
+                        }
+                        unweightedValue = AuxiliarMethods.computeAndEvaluate(unweightedAlg, runner, nDCG, numUsers);
+                    }
+
+
+
+                    // Store the nDCG values.
+                    if(weighted)
+                    {
+                        ranking.add(new Tuple2od<>("wei_" + algorithmName, weightedValue));
+                        ranking.add(new Tuple2od<>("unw_" + algorithmName, unweightedValue));
                     }
                     else
                     {
-                        value = AuxiliarMethods.computeAndEvaluate(rec, runner, nDCG, numUsers);
+                        ranking.add(new Tuple2od<>(algorithmName, unweightedValue));
                     }
 
-                    // Add the variant to the ranking
-                    ranking.add(new Tuple2od<>(name, value));
-                    System.out.println("Finished " + name + " (" + (timec - timeaa) + " ms.)");
                 }
-                catch (IOException e)
+                catch (IOException ioe)
                 {
-                    System.err.println("ERROR: Something failed while executing the " + name + " recommender");
+                    System.err.println("ERROR: Something failed while executing " + algorithmName);
                 }
+
+                long timebb = System.currentTimeMillis();
+                System.out.println("Algorithm " + counter.incrementAndGet() + "/" + totalCount + ": " + algorithmName + " finished (" + (timebb-timeaa) + " ms.)");
             });
 
-            timebb = System.currentTimeMillis();
-            System.err.println("Finished executing algorithm " + algorithm + "(" + (timebb - timeaa) + " ms.)");
-
-            // Write the algorithm ranking
-            try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputPath + algorithm + ".txt"))))
+            try(BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputPath + "validation_" + algorithm + ".txt"))))
             {
-                bw.write("Algorithm\tnDCG@" + maxLength);
-                while (!ranking.isEmpty())
+                bw.write("Ranking\tVariant\tnDCG@"+maxLength);
+                int i = 1;
+                while(!ranking.isEmpty())
                 {
-                    Tuple2od<String> elem = ranking.poll();
-                    bw.write("\n" + elem.v1 + "\t" + elem.v2);
+                    Tuple2od<String> tuple = ranking.poll();
+                    bw.write("\n" + i + "\t" + tuple.v1 + "\t" + tuple.v2);
+                    ++i;
                 }
             }
-            catch (IOException ioe)
+            catch(IOException ioe)
             {
-                System.err.println("ERROR: Something failed while writing the output file for algorithm" + algorithm);
+                System.err.println("ERROR: Something failed while writing the output file for algorithm " + algorithm);
             }
 
-            timebb = System.currentTimeMillis();
-            System.err.println("Finished writing the outcome for algorithm " + algorithm + "(" + (timebb - timeaa) + " ms.)");
+            long timecc = System.currentTimeMillis();
+            System.out.println("-------- Finished algorithm " + algorithm + " (" + (timecc-timeaa) + " ms.) --------");
         });
     }
 }

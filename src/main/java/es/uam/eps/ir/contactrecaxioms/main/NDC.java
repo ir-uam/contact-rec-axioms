@@ -17,6 +17,7 @@ import es.uam.eps.ir.contactrecaxioms.graph.io.TextGraphReader;
 import es.uam.eps.ir.contactrecaxioms.recommender.FastGraphIndex;
 import es.uam.eps.ir.contactrecaxioms.recommender.GraphIndex;
 import es.uam.eps.ir.contactrecaxioms.recommender.SocialFastFilters;
+import es.uam.eps.ir.contactrecaxioms.recommender.basic.Random;
 import es.uam.eps.ir.contactrecaxioms.recommender.grid.*;
 import es.uam.eps.ir.contactrecaxioms.utils.Tuple2oo;
 import es.uam.eps.ir.ranksys.fast.preference.FastPreferenceData;
@@ -32,8 +33,10 @@ import org.ranksys.formats.parsing.Parsers;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 
@@ -165,8 +168,17 @@ public class NDC
                 Configurations confs = grid.getConfigurations();
                 AlgorithmGridSelector<Long> algorithmSelector = new AlgorithmGridSelector<>();
 
+                // Configure the recommender runner
+                @SuppressWarnings("unchecked")
+                Function<Long, IntPredicate> filter = FastFilters.and(FastFilters.notInTrain(unweightedTrainData), FastFilters.notSelf(index), SocialFastFilters.notReciprocal(unweightedGraph, index));
+                RecommenderRunner<Long, Long> runner = new FastFilterRecommenderRunner<>(index, index, testData.getUsersWithPreferences(), filter, maxLength);
+
+                AtomicInteger counter = new AtomicInteger(0);
+                List<Parameters> configurations = confs.getConfigurations();
+                int totalCount = configurations.size();
+
                 // Now, execute each possible variant.
-                confs.getConfigurations().forEach(parameters ->
+                configurations.parallelStream().forEach(parameters ->
                 {
                     Tuple2oo<String, RecommendationAlgorithmFunction<Long>> tdSupp = algorithmSelector.getRecommender(tdIdentifier, parameters);
                     Tuple2oo<String, RecommendationAlgorithmFunction<Long>> noTdSupp = algorithmSelector.getRecommender(noTdIdentifier, parameters);
@@ -174,20 +186,21 @@ public class NDC
                     String noTdName = noTdSupp.v1();
 
                     // First, obtain the metric.
-                    NDCG.NDCGRelevanceModel<Long, Long> ndcgModel = new NDCG.NDCGRelevanceModel<>(false, testData, 1.0);
-                    SystemMetric<Long, Long> nDCG = new AverageRecommendationMetric<>(new NDCG<>(maxLength, ndcgModel), true);
-
-                    // Configure the recommender runner
-                    @SuppressWarnings("unchecked")
-                    Function<Long, IntPredicate> filter = FastFilters.and(FastFilters.notInTrain(unweightedTrainData), FastFilters.notSelf(index), SocialFastFilters.notReciprocal(unweightedGraph, index));
-                    RecommenderRunner<Long, Long> runner = new FastFilterRecommenderRunner<>(index, index, testData.getUsersWithPreferences(), filter, maxLength);
+                    NDCG.NDCGRelevanceModel<Long, Long> ndcgModel = new NDCG.NDCGRelevanceModel<>(false, testData, 0.5);
+                    SystemMetric<Long, Long> nDCG = new AverageRecommendationMetric<>(new NDCG<>(maxLength, ndcgModel), numUsers);
 
                     try
                     {
-                        Recommender<Long, Long> weightedTd = tdSupp.v2().apply(weightedGraph, weightedTrainData);
-                        Recommender<Long, Long> weightedNoTd = noTdSupp.v2().apply(weightedGraph, weightedTrainData);
+                        Recommender<Long, Long> weightedTd = new Random<>(unweightedGraph);
+                        Recommender<Long, Long> weightedNoTd = new Random<>(unweightedGraph);
                         Recommender<Long, Long> unweightedTd = tdSupp.v2().apply(unweightedGraph, unweightedTrainData);
                         Recommender<Long, Long> unweightedNoTd = noTdSupp.v2().apply(unweightedGraph, unweightedTrainData);
+
+                        if(weighted)
+                        {
+                            weightedTd = tdSupp.v2().apply(weightedGraph, weightedTrainData);
+                            weightedNoTd = noTdSupp.v2().apply(weightedGraph, weightedTrainData);
+                        }
 
                         double weightedTdValue = 0;
                         double weightedNoTdValue = 0;
@@ -217,7 +230,7 @@ public class NDC
                         }
 
                         long timebb = System.currentTimeMillis();
-                        System.out.println("Algorithm " + tdName + " finished (" + (timebb-timeaa) + " ms.)");
+                        System.out.println("Algorithm " + counter.incrementAndGet() + "/" + totalCount + ": " + tdName + " finished (" + (timebb-timeaa) + " ms.)");
 
                         // Store the nDCG values.
                         if(weighted)

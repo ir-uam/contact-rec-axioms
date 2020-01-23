@@ -36,17 +36,9 @@ public class QLJMNoTermDiscrimination<U> extends UserFastRankingRecommender<U>
      */
     private final double lambda;
     /**
-     * For each user, computes the proportion of neighbors it has, in comparison with the sum of all neighborhood sizes.
-     */
-    private final Int2DoubleMap pc;
-    /**
      * Neighborhood sizes
      */
     private final Int2DoubleMap size;
-    /**
-     * Sum of the neighborhood sizes
-     */
-    private final double fullSize;
     /**
      * Neighborhood selection for the target users.
      */
@@ -72,29 +64,21 @@ public class QLJMNoTermDiscrimination<U> extends UserFastRankingRecommender<U>
         this.lambda = lambda / (1 - lambda);
         this.size = new Int2DoubleOpenHashMap();
 
-        EdgeOrientation wSel = vSel.invertSelection();
         if (!graph.isDirected() || vSel.equals(EdgeOrientation.UND)) // vSel == wSel
         {
-            this.fullSize = this.getAllUidx().mapToDouble(vidx ->
+            this.getAllUidx().forEach(vidx ->
             {
                 double vS = graph.getNeighborhoodWeights(vidx, vSel).mapToDouble(Tuple2id::v2).sum();
                 this.size.put(vidx, vS);
-                return vS;
-            }).sum();
-            this.pc = size;
+            });
         }
         else
         {
-            this.pc = new Int2DoubleOpenHashMap();
-            this.fullSize = this.getAllUidx().mapToDouble(vidx ->
+            this.getAllUidx().forEach(vidx ->
             {
                 double vS = graph.getNeighborhoodWeights(vidx, vSel).mapToDouble(Tuple2id::v2).sum();
-                double wS = graph.getNeighborhoodWeights(vidx, wSel).mapToDouble(Tuple2id::v2).sum();
-
                 this.size.put(vidx, vS);
-                this.pc.put(vidx, wS);
-                return vS;
-            }).sum();
+            });
         }
     }
 
@@ -108,7 +92,6 @@ public class QLJMNoTermDiscrimination<U> extends UserFastRankingRecommender<U>
         {
             double uW = w.v2;
             int widx = w.v1;
-            double wPc = this.fullSize / (this.pc.get(widx));
 
             graph.getNeighborhoodWeights(widx, vSel).forEach(v ->
             {
