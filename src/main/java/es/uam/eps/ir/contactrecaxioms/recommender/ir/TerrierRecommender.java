@@ -12,8 +12,8 @@ package es.uam.eps.ir.contactrecaxioms.recommender.ir;
 import es.uam.eps.ir.contactrecaxioms.graph.edges.EdgeOrientation;
 import es.uam.eps.ir.contactrecaxioms.graph.fast.FastGraph;
 import es.uam.eps.ir.contactrecaxioms.recommender.UserFastRankingRecommender;
-import es.uam.eps.ir.contactrecaxioms.terrier.TerrierIndex;
-import es.uam.eps.ir.contactrecaxioms.terrier.TerrierStructure;
+import es.uam.eps.ir.contactrecaxioms.data.TerrierIndex;
+import es.uam.eps.ir.contactrecaxioms.data.TerrierStructure;
 import es.uam.eps.ir.contactrecaxioms.utils.Tuple2oo;
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
@@ -30,6 +30,8 @@ import java.util.Optional;
  * @param <U> Type of the users.
  *
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
  * @author Pablo Castells (pablo.castells@uam.es)
  */
 public abstract class TerrierRecommender<U> extends UserFastRankingRecommender<U>

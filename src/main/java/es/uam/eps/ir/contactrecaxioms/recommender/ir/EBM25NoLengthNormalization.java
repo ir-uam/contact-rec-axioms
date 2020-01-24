@@ -13,14 +13,14 @@ import es.uam.eps.ir.contactrecaxioms.graph.edges.EdgeOrientation;
 import es.uam.eps.ir.contactrecaxioms.graph.fast.FastGraph;
 
 /**
- * Adaptation of the BM-25 Information Retrieval Algorithm for user recommendation. Uses a term-based implementation.
- * <p>
- * Sparck Jones, K., Walker, S., Roberton S.E. A Probabilistic Model of Information Retrieval: Development and Comparative Experiments.
- * Information Processing and Management 36. February 2000, pp. 779-808 (part 1), pp. 809-840 (part 2).
+ * Adaptation of the Extreme BM-25 Information Retrieval Algorithm for user recommendation. Uses a term-based implementation.
  *
  * @param <U> type of the users
  *
- * @author Javier Sanz-Cruzado Puig
+ * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
+ * @author Pablo Castells (pablo.castells@uam.es)
  */
 public class EBM25NoLengthNormalization<U> extends BM25<U>
 {

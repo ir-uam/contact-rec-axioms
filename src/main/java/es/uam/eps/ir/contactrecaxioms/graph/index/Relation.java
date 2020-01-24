@@ -18,6 +18,8 @@ import java.util.stream.Stream;
  * @param <W> Type of the weights.
  *
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
  * @author Pablo Castells (pablo.castells@uam.es)
  */
 public interface Relation<W>

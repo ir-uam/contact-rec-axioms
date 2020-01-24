@@ -14,11 +14,11 @@ import es.uam.eps.ir.contactrecaxioms.graph.Adapters;
 import es.uam.eps.ir.contactrecaxioms.graph.Graph;
 import es.uam.eps.ir.contactrecaxioms.graph.fast.FastGraph;
 import es.uam.eps.ir.contactrecaxioms.graph.io.TextGraphReader;
-import es.uam.eps.ir.contactrecaxioms.recommender.FastGraphIndex;
-import es.uam.eps.ir.contactrecaxioms.recommender.GraphIndex;
+import es.uam.eps.ir.contactrecaxioms.data.FastGraphIndex;
+import es.uam.eps.ir.contactrecaxioms.data.GraphIndex;
 import es.uam.eps.ir.contactrecaxioms.recommender.SocialFastFilters;
 import es.uam.eps.ir.contactrecaxioms.recommender.basic.Random;
-import es.uam.eps.ir.contactrecaxioms.recommender.grid.*;
+import es.uam.eps.ir.contactrecaxioms.main.grid.*;
 import es.uam.eps.ir.contactrecaxioms.utils.Tuple2oo;
 import es.uam.eps.ir.ranksys.fast.preference.FastPreferenceData;
 import es.uam.eps.ir.ranksys.metrics.SystemMetric;
@@ -37,8 +37,6 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * Class that executes the validation process for the different contact recommendation algorithms.

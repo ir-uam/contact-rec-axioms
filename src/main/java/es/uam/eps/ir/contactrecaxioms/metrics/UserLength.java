@@ -13,6 +13,17 @@ import es.uam.eps.ir.ranksys.metrics.rank.RankingDiscountModel;
 import es.uam.eps.ir.ranksys.metrics.rel.RelevanceModel;
 import es.uam.eps.ir.ranksys.novdiv.itemnovelty.metrics.ItemNoveltyMetric;
 
+
+/**
+ * Given a recommendation, computes the average degree of the recommended users.
+ *
+ * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
+ * @author Pablo Castells (pablo.castells@uam.es)
+ *
+ * @param <U> Type of the users.
+ */
 public class UserLength<U> extends ItemNoveltyMetric<U, U>
 {
     /**

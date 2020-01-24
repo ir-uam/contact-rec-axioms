@@ -1,0 +1,433 @@
+<algorithms>
+	<algorithm> <!-- Random algorithm -->
+		<name>Random</name>
+	</algorithm>
+	<algorithm> <!-- Popularity-based algorithm -->
+		<name>Popularity</name> 
+	</algorithm>
+	<algorithm> <!-- Most common neighbors algorithm -->
+		<name>MCN</name>
+		<params>
+			<param>
+				<name>uSel</name> <!-- Neighborhood selection for the target user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>vSel</name> <!-- Neighborhood selection for the candidate user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+		</params>
+	</algorithm>
+	<algorithm> <!-- Jaccard algorithm -->
+		<name>Jaccard</name>
+		<params>
+			<param>
+				<name>uSel</name> <!-- Neighborhood selection for the target user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>vSel</name> <!-- Neighborhood selection for the candidate user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+		</params>
+	</algorithm>
+	<algorithm> <!-- Jaccard algorithm -->
+		<name>Adamic</name>
+		<params>
+			<param>
+				<name>uSel</name> <!-- Neighborhood selection for the target user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>vSel</name> <!-- Neighborhood selection for the candidate user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>wSel</name> <!-- Neighborhood selection for the common users -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+		</params>
+	</algorithm>
+	<algorithm> <!-- Cosine similarity algorithm -->
+		<name>Cosine</name>
+		<params>
+			<param>
+				<name>uSel</name> <!-- Neighborhood selection for the target user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>vSel</name> <!-- Neighborhood selection for the candidate user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+		</params>
+	</algorithm>
+	<algorithm> <!-- BIR algorithm -->
+		<name>BIR</name>
+		<params>
+			<param>
+				<name>uSel</name> <!-- Neighborhood selection for the target user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>vSel</name> <!-- Neighborhood selection for the candidate user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+		</params>
+	</algorithm>
+	<algorithm> <!-- BM25 algorithm -->
+		<name>BM25</name>
+		<params>
+			<param>
+				<name>uSel</name> <!-- Neighborhood selection for the target user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>vSel</name> <!-- Neighborhood selection for the candidate user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>dlSel</name> <!-- Neighborhood selection for the user length -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>b</name> <!-- Parameter that tunes the effect of the neighborhood size. Between 0 and 1 -->
+				<type>Double</type>
+				<values>
+					<range>
+						<start>0.1</start>
+						<end>0.999</end>
+						<step>0.1</step>
+					</range>
+				</values>
+			</param>
+			<param>
+				<name>k</name> <!-- Parameter that tunes the effect of the term frequency on the formula.-->
+				<type>Double</type>
+				<values>
+					<value>0.001</value>
+					<value>0.01</value>
+					<value>0.1</value>
+					<value>1</value>
+					<value>10</value>
+					<value>100</value>
+					<value>1000</value>
+				</values>
+			</param>
+		</params>
+	</algorithm>
+	<algorithm> <!-- Extreme BM25 algorithm -->
+		<name>EBM25</name>
+		<params>
+			<param>
+				<name>uSel</name> <!-- Neighborhood selection for the target user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>vSel</name> <!-- Neighborhood selection for the candidate user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>dlSel</name> <!-- Neighborhood selection for the user length -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>b</name> <!-- Parameter that tunes the effect of the neighborhood size. Between 0 and 1 -->
+				<type>Double</type>
+				<values>
+					<range>
+						<start>0.1</start>
+						<end>0.999</end>
+						<step>0.1</step>
+					</range>
+				</values>
+			</param>
+		</params>
+	</algorithm>
+	<algorithm> <!-- Pivoted normalization VSM algorithm -->
+		<name>Pivoted VSM</name>
+		<params>
+			<param>
+				<name>uSel</name> <!-- Neighborhood selection for the target user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>vSel</name> <!-- Neighborhood selection for the candidate user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>s</name> <!-- Parameter that tunes the effect of the neighborhood size. Between 0 and 1 -->
+				<type>Double</type>
+				<values>
+					<range>
+						<start>0.1</start>
+						<end>0.999</end>
+						<step>0.1</step>
+					</range>
+				</values>
+			</param>
+		</params>
+	</algorithm>
+	<algorithm> <!-- QLD algorithm -->
+		<name>QLD</name>
+		<params>
+			<param>
+				<name>uSel</name> <!-- Neighborhood selection for the target user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>vSel</name> <!-- Neighborhood selection for the candidate user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>mu</name> <!-- Parameter which controls the trade-off between the regularization term and the original term
+        in the formula. -->
+				<type>Double</type>
+				<values>
+					<value>0.001</value>
+					<value>0.01</value>
+					<value>0.1</value>
+					<value>1</value>
+					<value>10</value>
+					<value>100</value>
+					<value>1000</value>
+				</values>
+			</param>
+		</params>
+	</algorithm>
+	<algorithm> <!-- QLJM algorithm -->
+		<name>QLJM</name>
+		<params>
+			<param>
+				<name>uSel</name> <!-- Neighborhood selection for the target user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>vSel</name> <!-- Neighborhood selection for the candidate user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>lambda</name> <!-- Parameter which controls the trade-off between the regularization term and the original term
+        in the formula. -->
+				<type>Double</type>
+				<values>
+					<range>
+						<start>0.1</start>
+						<end>0.999</end>
+						<step>0.1</step>
+					</range>
+				</values>
+			</param>
+		</params>
+	</algorithm>
+	<algorithm> <!-- QLL algorithm -->
+		<name>QLL</name>
+		<params>
+			<param>
+				<name>uSel</name> <!-- Neighborhood selection for the target user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>vSel</name> <!-- Neighborhood selection for the candidate user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>gamma</name> <!-- Parameter which controls the trade-off between the regularization term and the original term
+        in the formula. -->
+				<type>Double</type>
+				<values>
+					<value>0.001</value>
+					<value>0.01</value>
+					<value>0.1</value>
+					<value>1</value>
+					<value>10</value>
+					<value>100</value>
+					<value>1000</value>
+				</values>
+			</param>
+		</params>
+	</algorithm>
+	<algorithm> <!-- PL2 algorithm -->
+		<name>PL2</name>
+		<params>
+			<param>
+				<name>uSel</name> <!-- Neighborhood selection for the target user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>vSel</name> <!-- Neighborhood selection for the candidate user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>c</name> <!-- Parameter which controls the trade-off between the regularization term and the original term
+        in the formula. -->
+				<type>Double</type>
+				<values>
+					<value>0.001</value>
+					<value>0.01</value>
+					<value>0.1</value>
+					<value>1</value>
+					<value>10</value>
+					<value>100</value>
+					<value>1000</value>
+				</values>
+			</param>
+		</params>
+	</algorithm>
+	<algorithm> <!-- DLH algorithm -->
+		<name>DLH</name>
+		<params>
+			<param>
+				<name>uSel</name> <!-- Neighborhood selection for the target user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>vSel</name> <!-- Neighborhood selection for the candidate user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+		</params>
+	</algorithm>
+	<algorithm> <!-- DPH algorithm -->
+		<name>DPH</name>
+		<params>
+			<param>
+				<name>uSel</name> <!-- Neighborhood selection for the target user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>vSel</name> <!-- Neighborhood selection for the candidate user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+		</params>
+	</algorithm>
+	<algorithm> <!-- DFRee algorithm -->
+		<name>DFRee</name>
+		<params>
+			<param>
+				<name>uSel</name> <!-- Neighborhood selection for the target user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>vSel</name> <!-- Neighborhood selection for the candidate user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+		</params>
+	</algorithm>
+	<algorithm> <!-- DFReeKLIM algorithm -->
+		<name>DFReeKLIM</name>
+		<params>
+			<param>
+				<name>uSel</name> <!-- Neighborhood selection for the target user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+			<param>
+				<name>vSel</name> <!-- Neighborhood selection for the candidate user -->
+				<type>LinkOrientation</type>
+				<values>
+					<value>UND</value>
+				</values>
+			</param>
+		</params>
+	</algorithm>
+</algorithms>	

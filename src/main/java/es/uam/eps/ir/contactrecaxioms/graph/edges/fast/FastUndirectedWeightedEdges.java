@@ -13,7 +13,7 @@ import es.uam.eps.ir.contactrecaxioms.graph.edges.EdgeType;
 import es.uam.eps.ir.contactrecaxioms.graph.edges.EdgeWeight;
 import es.uam.eps.ir.contactrecaxioms.graph.edges.UndirectedEdges;
 import es.uam.eps.ir.contactrecaxioms.graph.edges.WeightedEdges;
-import es.uam.eps.ir.contactrecaxioms.graph.index.FastWeightedAutoRelation;
+import es.uam.eps.ir.contactrecaxioms.graph.index.fast.FastWeightedAutoRelation;
 import es.uam.eps.ir.contactrecaxioms.graph.index.IdxValue;
 import es.uam.eps.ir.ranksys.fast.preference.IdxPref;
 
@@ -24,6 +24,8 @@ import java.util.stream.Stream;
  * Fast implementation of undirected weighted edges.
  *
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
  * @author Pablo Castells (pablo.castells@uam.es)
  */
 public class FastUndirectedWeightedEdges extends FastEdges implements UndirectedEdges, WeightedEdges

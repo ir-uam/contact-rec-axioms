@@ -11,16 +11,22 @@ package es.uam.eps.ir.contactrecaxioms.recommender.ir;
 
 import es.uam.eps.ir.contactrecaxioms.graph.edges.EdgeOrientation;
 import es.uam.eps.ir.contactrecaxioms.graph.fast.FastGraph;
-import es.uam.eps.ir.contactrecaxioms.terrier.TerrierStructure;
+import es.uam.eps.ir.contactrecaxioms.data.TerrierStructure;
 
 import java.util.Optional;
 
 /**
  * Class that applies the DFReeKLIM Divergence from Randomness model as a contact
  * recommendation algorithm.
+ * <p>
+ * Amati, G., Amodeo, G., Bianchi, M., Marcone, G., Bordoni, F.U., Gaibisso, C.,Gambosi, G., Celi, A., Nicola, C.D., Flammini, M.:
+ * FUB, IASI-CNR, UNIVAQ at TREC 2011 Microblog Track. In: Proceedings of the 20th Text REtrieval Confer-ence (TREC 2011). NIST (2011)
  *
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
  * @author Pablo Castells (pablo.castells@uam.es)
+ *
  * @see org.terrier.matching.models.DFReeKLIM
  */
 public class DFReeKLIM<U> extends TerrierRecommender<U>

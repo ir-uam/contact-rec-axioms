@@ -21,6 +21,8 @@ import es.uam.eps.ir.contactrecaxioms.graph.fast.FastUndirectedWeightedGraph;
  * @param <V> Type of the vertices.
  *
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
  * @author Pablo Castells (pablo.castells@uam.es)
  */
 public class EmptyGraphGenerator<V> implements GraphGenerator<V>

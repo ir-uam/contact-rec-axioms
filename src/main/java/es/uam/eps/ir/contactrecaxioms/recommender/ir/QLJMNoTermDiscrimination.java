@@ -26,6 +26,8 @@ import org.ranksys.core.util.tuples.Tuple2id;
  * @param <U> Type of the users
  *
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
  * @author Pablo Castells (pablo.castells@uam.es)
  */
 public class QLJMNoTermDiscrimination<U> extends UserFastRankingRecommender<U>

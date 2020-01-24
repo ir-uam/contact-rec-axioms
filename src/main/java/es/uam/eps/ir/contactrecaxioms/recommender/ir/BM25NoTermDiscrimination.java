@@ -25,7 +25,10 @@ import java.util.OptionalDouble;
  *
  * @param <U> type of the users
  *
- * @author Javier Sanz-Cruzado Puig
+ * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
+ * @author Pablo Castells (pablo.castells@uam.es)
  */
 public class BM25NoTermDiscrimination<U> extends UserFastRankingRecommender<U>
 {

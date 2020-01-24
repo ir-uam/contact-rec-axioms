@@ -9,8 +9,6 @@
  */
 package es.uam.eps.ir.contactrecaxioms.main;
 
-import es.uam.eps.ir.contactrecaxioms.recommender.io.EmptyWriter;
-import es.uam.eps.ir.ranksys.core.Recommendation;
 import es.uam.eps.ir.ranksys.metrics.SystemMetric;
 import es.uam.eps.ir.ranksys.rec.Recommender;
 import es.uam.eps.ir.ranksys.rec.runner.RecommenderRunner;
@@ -26,7 +24,6 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * Class containing auxiliar methods for the Main functions.

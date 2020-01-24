@@ -16,11 +16,16 @@ import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 
 /**
- * Recommender that uses the Jaccard coefficient of the neighbours.
+ * Recommended based on the Jaccard similarity.
+ * <p>
+ * Jaccard,  P.: ́Etude comparative de la distribution florale dans une portion des Alpes et des Jura.
+ * Bulletin de la Socíet́e Vaudoise des Sciences Naturelles 37(142),547–579 (1901)
  *
  * @param <U> type of the users.
  *
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
  * @author Pablo Castells (pablo.castells@uam.es)
  */
 public class Jaccard<U> extends UserFastRankingRecommender<U>

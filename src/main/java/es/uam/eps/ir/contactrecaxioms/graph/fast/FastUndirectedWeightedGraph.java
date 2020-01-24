@@ -24,6 +24,8 @@ import no.uib.cipr.matrix.sparse.LinkedSparseMatrix;
  * @param <V> type of the nodes
  *
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
  * @author Pablo Castells (pablo.castells@uam.es)
  */
 public class FastUndirectedWeightedGraph<V> extends FastGraph<V> implements UndirectedWeightedGraph<V>

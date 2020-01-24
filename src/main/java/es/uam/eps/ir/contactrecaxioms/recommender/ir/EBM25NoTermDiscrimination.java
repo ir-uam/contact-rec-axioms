@@ -18,8 +18,9 @@ import es.uam.eps.ir.contactrecaxioms.graph.fast.FastGraph;
  * @param <U> type of the users
  *
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
  * @author Pablo Castells (pablo.castells@uam.es)
- * @see es.uam.eps.ir.contactrecaxioms.recommender.ir.BM25
  */
 public class EBM25NoTermDiscrimination<U> extends BM25NoTermDiscrimination<U>
 {

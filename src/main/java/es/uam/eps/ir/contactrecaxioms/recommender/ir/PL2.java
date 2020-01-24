@@ -11,16 +11,22 @@ package es.uam.eps.ir.contactrecaxioms.recommender.ir;
 
 import es.uam.eps.ir.contactrecaxioms.graph.edges.EdgeOrientation;
 import es.uam.eps.ir.contactrecaxioms.graph.fast.FastGraph;
-import es.uam.eps.ir.contactrecaxioms.terrier.TerrierStructure;
+import es.uam.eps.ir.contactrecaxioms.data.TerrierStructure;
 
 import java.util.Optional;
 
 /**
  * Class that applies the PL2 Divergence from Randomness model as a contact
  * recommendation algorithm.
+ * <p>
+ * Amati, G., Van Rijsbergen, C.J.: Probabilistic Models of Information Retrieval Based on Measuring the Divergence from Randomness.
+ * ACM Transactions on Information Systems 20(4), 357–389 (2002)
  *
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
  * @author Pablo Castells (pablo.castells@uam.es)
+ *
  * @see org.terrier.matching.models.PL2
  */
 public class PL2<U> extends TerrierRecommender<U>

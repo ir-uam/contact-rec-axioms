@@ -16,15 +16,17 @@ import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 
 /**
- * Most Common Neighbours (MCN) recommender. Recommends the users that share the maximum number of neighbours with the target user.
+ * Recommended that sorts candidate users according to the number of neighbors in common with the target one.
  * <p>
  * Liben-Nowell, D., Kleinberg, J. The Link Prediction Problem for Social Networks. Journal of the American Society for Information Science and Technology 58(7), May 2007.
+ * <p>
  * Newman, M.E.J. Clustering and Preferential Attachment in Growing Networks. Physical Review Letters E, 64(025102), April 2001.
- * *
  *
  * @param <U> type of the users.
  *
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
  * @author Pablo Castells (pablo.castells@uam.es)
  */
 public class MostCommonNeighbors<U> extends UserFastRankingRecommender<U>

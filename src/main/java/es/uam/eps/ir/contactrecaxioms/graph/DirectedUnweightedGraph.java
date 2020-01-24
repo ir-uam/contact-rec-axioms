@@ -15,6 +15,8 @@ package es.uam.eps.ir.contactrecaxioms.graph;
  * @param <V> Type of vertices.
  *
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
  * @author Pablo Castells (pablo.castells@uam.es)
  */
 public interface DirectedUnweightedGraph<V> extends UnweightedGraph<V>, DirectedGraph<V>

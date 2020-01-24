@@ -15,9 +15,12 @@ import es.uam.eps.ir.contactrecaxioms.graph.generator.GeneratorNotConfiguredExce
 import es.uam.eps.ir.contactrecaxioms.graph.generator.GraphGenerator;
 
 /**
- * Methods for obtaining graphs fulfilling some properties, starting from a given graph.
+ * Methods for filtering the users and edges from a graph.
  *
- * @author Javier Sanz-Cruzado Puig
+ * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
+ * @author Pablo Castells (pablo.castells@uam.es)
  */
 public class Adapters
 {
@@ -93,6 +96,14 @@ public class Adapters
 
     }
 
+    /**
+     * Given two graphs (test and training graphs), generates a new graph containing only the users present in the
+     * second one.
+     * @param graph the test graph.
+     * @param trainingGraph the training graph.
+     * @param <U> type of the users.
+     * @return the graph if everything went OK, null otherwise.
+     */
     public static <U> Graph<U> onlyTrainUsers(Graph<U> graph, Graph<U> trainingGraph)
     {
         try

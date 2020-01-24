@@ -10,8 +10,6 @@
 package es.uam.eps.ir.contactrecaxioms.data;
 
 import es.uam.eps.ir.contactrecaxioms.graph.fast.FastGraph;
-import es.uam.eps.ir.contactrecaxioms.recommender.FastGraphIndex;
-import es.uam.eps.ir.contactrecaxioms.recommender.GraphIndex;
 import es.uam.eps.ir.ranksys.core.preference.IdPref;
 import es.uam.eps.ir.ranksys.fast.preference.IdxPref;
 import es.uam.eps.ir.ranksys.fast.preference.SimpleFastPreferenceData;
@@ -31,7 +29,10 @@ import java.util.stream.Stream;
  *
  * @param <U> type of the users
  *
- * @author Javier Sanz-Cruzado Puig
+ * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
+ * @author Pablo Castells (pablo.castells@uam.es)
  * @author Saúl Vargas (saul.vargas@uam.es)
  */
 public class GraphSimpleFastPreferenceData<U> extends SimpleFastPreferenceData<U, U>

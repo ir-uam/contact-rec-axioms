@@ -12,7 +12,9 @@ package es.uam.eps.ir.contactrecaxioms.graph.generator;
 /**
  * Exception for unconfigured generators.
  *
- * @author Javier Sanz-Cruzado Puig (javier.sanz-cruzado@uam.es)
+ * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
  * @author Pablo Castells (pablo.castells@uam.es)
  */
 public class GeneratorNotConfiguredException extends Exception

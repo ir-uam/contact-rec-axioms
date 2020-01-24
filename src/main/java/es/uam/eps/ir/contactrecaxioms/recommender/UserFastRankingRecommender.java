@@ -9,6 +9,8 @@
  */
 package es.uam.eps.ir.contactrecaxioms.recommender;
 
+import es.uam.eps.ir.contactrecaxioms.data.FastGraphIndex;
+import es.uam.eps.ir.contactrecaxioms.data.GraphIndex;
 import es.uam.eps.ir.contactrecaxioms.graph.edges.EdgeOrientation;
 import es.uam.eps.ir.contactrecaxioms.graph.fast.FastGraph;
 import es.uam.eps.ir.ranksys.rec.fast.FastRankingRecommender;

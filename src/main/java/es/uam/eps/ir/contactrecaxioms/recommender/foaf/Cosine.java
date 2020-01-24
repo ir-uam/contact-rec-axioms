@@ -19,13 +19,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Recommender based on cosine similarity.
+ * Recommender using the cosine similarity to produce recommendations.
  * <p>
  * Lü, L., Zhou. T. Link Prediction in Complex Networks: A survey. Physica A: Statistical Mechanics and its Applications, 390(6), March 2011, pp. 1150-1170.
  *
  * @param <U> Type of the users
  *
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
  * @author Pablo Castells (pablo.castells@uam.es)
  */
 public class Cosine<U> extends UserFastRankingRecommender<U>

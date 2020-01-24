@@ -11,16 +11,22 @@ package es.uam.eps.ir.contactrecaxioms.recommender.ir;
 
 import es.uam.eps.ir.contactrecaxioms.graph.edges.EdgeOrientation;
 import es.uam.eps.ir.contactrecaxioms.graph.fast.FastGraph;
-import es.uam.eps.ir.contactrecaxioms.terrier.TerrierStructure;
+import es.uam.eps.ir.contactrecaxioms.data.TerrierStructure;
 
 import java.util.Optional;
 
 /**
- * Class that applies the DFRee Divergence from Randomness model as a contact
+ * Class that applies the DPH Divergence from Randomness model as a contact
  * recommendation algorithm.
+ * <p>
+ * Amati, G.: Frequentist and Bayesian Approach to Information Retrieval. In: Pro-ceedings of the 28th European Conference on Information Retrieval (ECIR 2006).pp. 13–24. No. 3936 in LNCS, Springer (2006)
  *
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
  * @author Pablo Castells (pablo.castells@uam.es)
+ *
+ * @see org.terrier.matching.models.DPH
  */
 public class DPH<U> extends TerrierRecommender<U>
 {

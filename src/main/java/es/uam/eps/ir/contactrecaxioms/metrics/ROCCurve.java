@@ -17,6 +17,11 @@ import java.util.List;
 
 /**
  * Given a list, finds the receiver operating characteristic (ROC) curve.
+ *
+ * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
+ * @author Pablo Castells (pablo.castells@uam.es)
  */
 public class ROCCurve
 {

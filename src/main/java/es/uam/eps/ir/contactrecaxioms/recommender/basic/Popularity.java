@@ -16,15 +16,14 @@ import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 
 /**
- * Destination degree recommender. Recommender based on the Preferential Attachment link prediction method.
- * When the selected neighbourhood is formed by the incoming nodes, then this method is equal to the Popularity
- * recommender method.
- * <p>
- * Newman, M.E.J. Clustering and Preferential Attachment in Growing Networks. Physical Review Letters E, 64(025102), April 2001.
+ * Popularity recommender. Recommends users according to their degree.
  *
  * @param <U> Type of the users.
  *
- * @author Javier Sanz-Cruzado Puig
+ * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
+ * @author Pablo Castells (pablo.castells@uam.es)
  */
 public class Popularity<U> extends UserFastRankingRecommender<U>
 {

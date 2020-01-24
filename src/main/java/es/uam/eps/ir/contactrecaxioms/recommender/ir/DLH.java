@@ -11,16 +11,21 @@ package es.uam.eps.ir.contactrecaxioms.recommender.ir;
 
 import es.uam.eps.ir.contactrecaxioms.graph.edges.EdgeOrientation;
 import es.uam.eps.ir.contactrecaxioms.graph.fast.FastGraph;
-import es.uam.eps.ir.contactrecaxioms.terrier.TerrierStructure;
+import es.uam.eps.ir.contactrecaxioms.data.TerrierStructure;
 
 import java.util.Optional;
 
 /**
  * Class that applies the DLH Divergence from Randomness model as a contact
  * recommendation algorithm.
+ * <p>
+ * Amati, G., Ambrosi, E., Bianchi, M., Gaibisso, C., Gambosi, G.: FUB, IASI-CNRand University of Tor Vergata at TREC 2007 Blog Track. In: Proceedings of the16th Text REtrieval Conference (TREC 2007). NIST (2007
  *
  * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
  * @author Pablo Castells (pablo.castells@uam.es)
+ *
  * @see org.terrier.matching.models.DLH
  */
 public class DLH<U> extends TerrierRecommender<U>

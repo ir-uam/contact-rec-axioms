@@ -9,6 +9,7 @@
  */
 package es.uam.eps.ir.contactrecaxioms.recommender;
 
+import es.uam.eps.ir.contactrecaxioms.data.GraphIndex;
 import es.uam.eps.ir.contactrecaxioms.graph.fast.FastGraph;
 
 import java.util.function.Function;
@@ -17,7 +18,10 @@ import java.util.function.IntPredicate;
 /**
  * Filters for contact recommendation.
  *
- * @author Javier Sanz-Cruzado Puig
+ * @author Javier Sanz-Cruzado (javier.sanz-cruzado@uam.es)
+ * @author Craig Macdonald (craig.macdonald@glasgow.ac.uk)
+ * @author Iadh Ounis (iadh.ounis@glasgow.ac.uk)
+ * @author Pablo Castells (pablo.castells@uam.es)
  */
 public class SocialFastFilters
 {
