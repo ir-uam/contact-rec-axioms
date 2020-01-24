@@ -15,55 +15,29 @@ Terrier Group at University of Glasgow
 ## Software description
 This repository contains all the needed classes to reproduce the experiments explained in the paper. The software contains the following packages:
 
-### Algorithms
-The software includes the implementation of several contact recommendation approaches which are used in our experiments.
-
-#### Information Retrieval Models
-* Probability ranking principle models
-    * Binary Independent Retrieval (BIR).
-    * BM25, plus versions without term discrimination and length normalization.
-    * Extreme BM25 (EBM25), plus version without term discrimination.
-* Language Models
-    * Query Likelihood with Jelinek-Mercer smoothing (QLJM), plus versions without term discrimination and length normalization.
-    * Query Likelihood with Dirichlet smoothing (QLD), plus versions without term discrimination and length normalization.
-    * Query Likelihood with Laplace smoothing (QLL).
-* Divergence From Randomness
-    * DFRee
-    * DFReeKLIM
-    * DLH
-    * DPH
-    * PL2
-* Pivoted normalization Vector Space Model (VSM)
-
-#### Friends of friends algorithms for contact recommendation
-* Most Common Neighbors
-* Cosine
-* Jaccard
-* Adamic-Adar
-
-Next, we include a table including the different parameter configurations we have selected for the experiments in our paper. 
-We include these configurations in the `conf` folder. The notation followed is the same as the one indicated in the previous 
-formulas. In addition, similarly to [1], we choose, for the directed graphs, different orientations for the target and candidate
-users' neighborhoods (the incoming, outgoing or undireted neighborhood of the users). In BM25 and EBM25 we also select
-a different neighborhood for the length.
-
-| Algorithm (and variants) | Parameters |
-| --- | --- |
-| BM25 | <img src="https://latex.codecogs.com/gif.latex?b%20\in%20\{%200.1,0.2,0.3,...,0.8,0.9,0.999,1.0%20\}" /> <br> <img src="https://latex.codecogs.com/gif.latex?k%20\in%20\{%200.001,0.01,0.1,1,10,100,1000%20\}" /> |
-| EBM25 | <img src="https://latex.codecogs.com/gif.latex?b%20\in%20\{%200.1,0.2,0.3,...,0.8,0.9,0.999,1.0%20\}" /> |
-| QLD | <img src="https://latex.codecogs.com/gif.latex?\mu%20\in%20\{%200.001,0.01,0.1,1,10,100,1000%20\}" /> |
-| QLJM | <img src="https://latex.codecogs.com/gif.latex?\lambda%20\in%20\{%200.1,0.2,0.3,...,0.8,0.9,0.999,1.0%20\}" /> |
-| QLL | <img src="https://latex.codecogs.com/gif.latex?\gamma%20\in%20\{%200.001,0.01,0.1,1,10,100,1000%20\}" /> |
-| PL2 | <img src="https://latex.codecogs.com/gif.latex?c%20\in%20\{%200.001,0.01,0.1,1,10,100,1000%20\}" /> |
-| Pivoted normalization |  <img src="https://latex.codecogs.com/gif.latex?s%20\in%20\{%200.1,0.2,0.3,...,0.8,0.9,0.999,1.0%20\}" /> |
-
-### Metrics
-- nDCG@k
-- AUC
+- `es.uam.eps.ir.contactrecaxioms.data`: Classes for handling the ratings by users for items. Extension of the RankSys preference data that use graphs.
+- `es.uam.eps.ir.contactrecaxioms.graph`: Classes for handling network data.
+- `es.uam.eps.ir.contactrecaxioms.main`: Main programs and auxiliar classes.
+- `es.uam.eps.ir.contactrecaxioms.metrics`: Classes implementing the metrics used in the experiments which are not provided by RankSys.
+- `es.uam.eps.ir.contactrecaxioms.recommenders`: Implementation of recommendation algorithms.
+- `es.uam.eps.ir.contactrecaxioms.utils`: Additional classes, useful for the rest of the program.
 
 ## System Requirements
+**Java JDK:** 1.8 or above.
+
+**Maven:** tested with version 3.6.0.
 
 ## Installation
+In order to install this program, you need to have Maven (https://maven.apache.org) installed on your system. Then, download the files into a directory, and execute the following command:
+```
+mvn compile assembly::single
+```
+If you do not want to use Maven, it is still possible to compile the code using any Java compiler. In that case, you will need the following libraries:
+- Ranksys version 0.4.3: http://ranksys.org
+- Colt version 1.2.0: https://dst.lbl.gov/ACSSoftware/colt
+- Google MTJ version 1.0.4: https://github.com/fommil/matrix-toolkits-java
+- Terrier version 5.1: http://terrier.org/
+- FastUtil version 8.3.0: http://fastutil.di.unimi.it/
 
 ## Execution
 The descriptions for the different programs is included in the Wiki for this project. We include here the links to the descriptions of each program. 
