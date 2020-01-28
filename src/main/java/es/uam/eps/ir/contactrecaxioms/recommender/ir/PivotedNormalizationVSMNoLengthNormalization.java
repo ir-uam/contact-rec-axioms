@@ -15,7 +15,7 @@ import es.uam.eps.ir.contactrecaxioms.graph.fast.FastGraph;
 /**
  * Adaptation of the pivoted normalization vector space model (VSM), without length normalization.
  * <p>
- * Singhal, A., Choi, J., Hindle, D., Lewis, D.D., Pereira, F.C.N.: AT&T at TREC-7.In: Proceedings of the 7th Text REtrieval Conference (TREC 1998). pp. 186–198.NIST (1998)
+ * Singhal, A., Choi, J., Hindle, D., Lewis, D.D., Pereira, F.C.N.: AT &amp; T at TREC-7.In: Proceedings of the 7th Text REtrieval Conference (TREC 1998). pp. 186–198.NIST (1998)
  *
  * @param <U> Type of the users.
  *

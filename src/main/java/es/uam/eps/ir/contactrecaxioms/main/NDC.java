@@ -211,22 +211,22 @@ public class NDC
                         {
                             if(weighted)
                             {
-                                weightedTdValue = AuxiliarMethods.computeAndEvaluate(tdDirectory + "wei_" + tdName + ".txt", weightedTd, runner, nDCG, numUsers);
-                                weightedNoTdValue = AuxiliarMethods.computeAndEvaluate(noTdDirectory + "wei_" + noTdName + ".txt", weightedNoTd, runner, nDCG, numUsers);
+                                weightedTdValue = AuxiliarMethods.computeAndEvaluate(tdDirectory + "wei_" + tdName + ".txt", weightedTd, runner, nDCG);
+                                weightedNoTdValue = AuxiliarMethods.computeAndEvaluate(noTdDirectory + "wei_" + noTdName + ".txt", weightedNoTd, runner, nDCG);
                             }
 
-                            unweightedTdValue = AuxiliarMethods.computeAndEvaluate(tdDirectory + (weighted ? "unw_" : "") + tdName + ".txt", unweightedTd, runner, nDCG, numUsers);
-                            unweightedNoTdValue = AuxiliarMethods.computeAndEvaluate(noTdDirectory + (weighted ? "unw_" : "") + noTdName + ".txt", unweightedNoTd, runner, nDCG, numUsers);
+                            unweightedTdValue = AuxiliarMethods.computeAndEvaluate(tdDirectory + (weighted ? "unw_" : "") + tdName + ".txt", unweightedTd, runner, nDCG);
+                            unweightedNoTdValue = AuxiliarMethods.computeAndEvaluate(noTdDirectory + (weighted ? "unw_" : "") + noTdName + ".txt", unweightedNoTd, runner, nDCG);
                         }
                         else // Otherwise
                         {
                             if(weighted)
                             {
-                                weightedTdValue = AuxiliarMethods.computeAndEvaluate(weightedTd, runner, nDCG, numUsers);
-                                weightedNoTdValue = AuxiliarMethods.computeAndEvaluate(weightedNoTd, runner, nDCG, numUsers);
+                                weightedTdValue = AuxiliarMethods.computeAndEvaluate(weightedTd, runner, nDCG);
+                                weightedNoTdValue = AuxiliarMethods.computeAndEvaluate(weightedNoTd, runner, nDCG);
                             }
-                            unweightedTdValue = AuxiliarMethods.computeAndEvaluate(unweightedTd, runner, nDCG, numUsers);
-                            unweightedNoTdValue = AuxiliarMethods.computeAndEvaluate(unweightedNoTd, runner, nDCG, numUsers);
+                            unweightedTdValue = AuxiliarMethods.computeAndEvaluate(unweightedTd, runner, nDCG);
+                            unweightedNoTdValue = AuxiliarMethods.computeAndEvaluate(unweightedNoTd, runner, nDCG);
                         }
 
                         long timebb = System.currentTimeMillis();

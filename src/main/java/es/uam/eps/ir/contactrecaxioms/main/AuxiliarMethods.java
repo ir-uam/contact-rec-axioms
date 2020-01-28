@@ -47,7 +47,7 @@ public class AuxiliarMethods
      *
      * @throws IOException if something fails during the writing / reading of the recommendation file.
      */
-    public static double computeAndEvaluate(String output, Recommender<Long, Long> recommender, RecommenderRunner<Long, Long> runner, SystemMetric<Long, Long> metric, int numUsers) throws IOException
+    public static double computeAndEvaluate(String output, Recommender<Long, Long> recommender, RecommenderRunner<Long, Long> runner, SystemMetric<Long, Long> metric) throws IOException
     {
         RecommendationFormat<Long, Long> format = new SimpleRecommendationFormat<>(Parsers.lp, Parsers.lp);
         RecommendationFormat.Writer<Long, Long> writer;
@@ -60,15 +60,13 @@ public class AuxiliarMethods
         writer.close();
 
         reader = format.getReader(output);
-        int totalrecs = reader.readAll().mapToInt(rec ->
+        reader.readAll().forEach(rec ->
         {
-            if(rec != null && rec.getItems() != null && !rec.getItems().isEmpty())
+            if (rec != null && rec.getItems() != null && !rec.getItems().isEmpty())
             {
                 metric.add(rec);
-                return 1;
             }
-            return 0;
-        }).sum();
+        });
         return metric.evaluate();
     }
 
@@ -81,7 +79,7 @@ public class AuxiliarMethods
      *
      * @return the value of the metric.
      */
-    public static double computeAndEvaluate(Recommender<Long, Long> recommender, RecommenderRunner<Long, Long> runner, SystemMetric<Long, Long> metric, int numUsers)
+    public static double computeAndEvaluate(Recommender<Long, Long> recommender, RecommenderRunner<Long, Long> runner, SystemMetric<Long, Long> metric)
     {
         EmptyWriter<Long, Long> writer = new EmptyWriter<>();
         runner.run(recommender, writer);
@@ -89,7 +87,7 @@ public class AuxiliarMethods
         metric.reset();
         writer.readAll().forEach(rec ->
         {
-            if(rec != null && rec.getItems() != null && !rec.getItems().isEmpty())
+            if (rec != null && rec.getItems() != null && !rec.getItems().isEmpty())
             {
                 metric.add(rec);
             }

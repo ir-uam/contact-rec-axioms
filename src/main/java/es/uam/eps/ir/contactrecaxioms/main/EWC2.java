@@ -181,13 +181,13 @@ public class EWC2
                 // Execute and evaluate the recommenders
                 if(printRecs)
                 {
-                    bm25value = AuxiliarMethods.computeAndEvaluate(outputPath + "bm25" + File.separator + bm25name + ".txt", bm25, runner, nDCG, numUsers);
-                    ebm25value = AuxiliarMethods.computeAndEvaluate(outputPath + "ebm25" + File.separator + ebm25name + ".txt", ebm25, runner, nDCG, numUsers);
+                    bm25value = AuxiliarMethods.computeAndEvaluate(outputPath + "bm25" + File.separator + bm25name + ".txt", bm25, runner, nDCG);
+                    ebm25value = AuxiliarMethods.computeAndEvaluate(outputPath + "ebm25" + File.separator + ebm25name + ".txt", ebm25, runner, nDCG);
                 }
                 else
                 {
-                    bm25value = AuxiliarMethods.computeAndEvaluate(bm25, runner, nDCG, numUsers);
-                    ebm25value = AuxiliarMethods.computeAndEvaluate(ebm25, runner, nDCG, numUsers);
+                    bm25value = AuxiliarMethods.computeAndEvaluate(bm25, runner, nDCG);
+                    ebm25value = AuxiliarMethods.computeAndEvaluate(ebm25, runner, nDCG);
                 }
 
                 // Store the accuracy values.

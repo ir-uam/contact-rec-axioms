@@ -195,21 +195,21 @@ public class CLNCS
                         {
                             if(weighted)
                             {
-                                weightedLenNormValue = AuxiliarMethods.computeAndEvaluate(lenNormDirectory + "wei_" + lenNormName + ".txt", weightedLenNorm, runner, nDCG, numUsers);
-                                weightedNoLenNormValue = AuxiliarMethods.computeAndEvaluate(noLenNormDirectory + "wei_" + noLenNormName + ".txt", weightedNoLenNorm, runner, nDCG, numUsers);
+                                weightedLenNormValue = AuxiliarMethods.computeAndEvaluate(lenNormDirectory + "wei_" + lenNormName + ".txt", weightedLenNorm, runner, nDCG);
+                                weightedNoLenNormValue = AuxiliarMethods.computeAndEvaluate(noLenNormDirectory + "wei_" + noLenNormName + ".txt", weightedNoLenNorm, runner, nDCG);
                             }
-                            unweightedLenNormValue = AuxiliarMethods.computeAndEvaluate(lenNormDirectory + (weighted ? "unw_" : "") + lenNormName + ".txt", unweightedLenNorm, runner, nDCG, numUsers);
-                            unweightedNoLenNormValue = AuxiliarMethods.computeAndEvaluate(noLenNormDirectory + noLenNormName + ".txt", unweightedNoLenNorm, runner, nDCG, numUsers);
+                            unweightedLenNormValue = AuxiliarMethods.computeAndEvaluate(lenNormDirectory + (weighted ? "unw_" : "") + lenNormName + ".txt", unweightedLenNorm, runner, nDCG);
+                            unweightedNoLenNormValue = AuxiliarMethods.computeAndEvaluate(noLenNormDirectory + noLenNormName + ".txt", unweightedNoLenNorm, runner, nDCG);
                         }
                         else
                         {
                             if(weighted)
                             {
-                                weightedLenNormValue = AuxiliarMethods.computeAndEvaluate(weightedLenNorm, runner, nDCG, numUsers);
-                                weightedNoLenNormValue = AuxiliarMethods.computeAndEvaluate(weightedNoLenNorm, runner, nDCG, numUsers);
+                                weightedLenNormValue = AuxiliarMethods.computeAndEvaluate(weightedLenNorm, runner, nDCG);
+                                weightedNoLenNormValue = AuxiliarMethods.computeAndEvaluate(weightedNoLenNorm, runner, nDCG);
                             }
-                            unweightedLenNormValue = AuxiliarMethods.computeAndEvaluate(unweightedLenNorm, runner, nDCG, numUsers);
-                            unweightedNoLenNormValue = AuxiliarMethods.computeAndEvaluate(unweightedNoLenNorm, runner, nDCG, numUsers);
+                            unweightedLenNormValue = AuxiliarMethods.computeAndEvaluate(unweightedLenNorm, runner, nDCG);
+                            unweightedNoLenNormValue = AuxiliarMethods.computeAndEvaluate(unweightedNoLenNorm, runner, nDCG);
                         }
 
                         if(weighted)

@@ -208,11 +208,11 @@ public class EWC1
                 {
                     if (printRecommenders)
                     {
-                        value = AuxiliarMethods.computeAndEvaluate(path, rec, runner, nDCG, numUsers);
+                        value = AuxiliarMethods.computeAndEvaluate(path, rec, runner, nDCG);
                     }
                     else
                     {
-                        value = AuxiliarMethods.computeAndEvaluate(rec, runner, nDCG, numUsers);
+                        value = AuxiliarMethods.computeAndEvaluate(rec, runner, nDCG);
                     }
 
                     if (weighted)

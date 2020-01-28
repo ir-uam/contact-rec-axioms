@@ -191,17 +191,17 @@ public class Validation
                     {
                         if(weighted)
                         {
-                            weightedValue = AuxiliarMethods.computeAndEvaluate(directory + "wei_" + algorithmName + ".txt", weightedAlg, runner, nDCG, numUsers);
+                            weightedValue = AuxiliarMethods.computeAndEvaluate(directory + "wei_" + algorithmName + ".txt", weightedAlg, runner, nDCG);
                         }
-                        unweightedValue = AuxiliarMethods.computeAndEvaluate(directory + (weighted ? "unw_" : "") + algorithmName + ".txt", unweightedAlg, runner, nDCG, numUsers);
+                        unweightedValue = AuxiliarMethods.computeAndEvaluate(directory + (weighted ? "unw_" : "") + algorithmName + ".txt", unweightedAlg, runner, nDCG);
                     }
                     else // Otherwise
                     {
                         if(weighted)
                         {
-                            weightedValue = AuxiliarMethods.computeAndEvaluate(weightedAlg, runner, nDCG, numUsers);
+                            weightedValue = AuxiliarMethods.computeAndEvaluate(weightedAlg, runner, nDCG);
                         }
-                        unweightedValue = AuxiliarMethods.computeAndEvaluate(unweightedAlg, runner, nDCG, numUsers);
+                        unweightedValue = AuxiliarMethods.computeAndEvaluate(unweightedAlg, runner, nDCG);
                     }
 
 

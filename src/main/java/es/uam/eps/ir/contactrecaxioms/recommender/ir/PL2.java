@@ -39,6 +39,7 @@ public class PL2<U> extends TerrierRecommender<U>
      * @param graph the training graph.
      * @param uSel  orientation selection for the target user.
      * @param vSel  orientation selection for the candidate user.
+     * @param c     parameter for tuning the importance of the candidate user length.
      */
     public PL2(FastGraph<U> graph, EdgeOrientation uSel, EdgeOrientation vSel, double c)
     {
@@ -53,6 +54,7 @@ public class PL2<U> extends TerrierRecommender<U>
      * @param uSel      orientation selection for the target user.
      * @param vSel      orientation selection for the candidate user.
      * @param structure Terrier basic structures for the algorithm.
+     * @param c         parameter for tuning the importance of the candidate user length.
      */
     public PL2(FastGraph<U> graph, EdgeOrientation uSel, EdgeOrientation vSel, TerrierStructure structure, double c)
     {
